@@ -6,236 +6,479 @@
     <title>Controle de Equipamentos</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-    <header class="topbar">
-        <div class="logo-area">
-            <div class="logo">ML</div>
-            <div>
-                <h1>Controle de Equipamentos</h1>
-                <span>Gestão de retiradas e devoluções</span>
-            </div>
+<header class="topbar">
+
+    <div class="logo-area">
+
+        <div class="logo">
+            ML
         </div>
-    </header>
 
-    <nav class="menu">
-        <button class="menu-btn active" onclick="mostrarPagina('dashboard')">
-            Dashboard
-        </button>
+        <div>
+            <h1>Controle de Equipamentos</h1>
+            <span>Gestão de retiradas e devoluções</span>
+        </div>
 
-        <button class="menu-btn" onclick="mostrarPagina('retirada')">
-            Registro de retirada
-        </button>
+    </div>
 
-        <button class="menu-btn" onclick="mostrarPagina('historico')">
-            Histórico
-        </button>
-    </nav>
-
-    <main>
-
-        <!-- DASHBOARD -->
-        <section id="dashboard" class="pagina active">
-
-            <div class="pagina-header">
-                <div>
-                    <h2>Dashboard</h2>
-                    <p>Visão geral dos equipamentos.</p>
-                </div>
-            </div>
-
-            <div class="cards">
-
-                <div class="card amarelo">
-                    <span>Total retirados</span>
-                    <strong id="totalRetirados">0</strong>
-                </div>
-
-                <div class="card verde">
-                    <span>Devolvidos</span>
-                    <strong id="totalDevolvidos">0</strong>
-                </div>
-
-                <div class="card vermelho">
-                    <span>Extraviados</span>
-                    <strong id="totalExtraviados">0</strong>
-                </div>
-
-            </div>
-
-            <div class="painel">
-                <h3>Buscar equipamento ou colaborador</h3>
-
-                <div class="busca">
-                    <input
-                        type="text"
-                        id="buscaDashboard"
-                        placeholder="Digite o LMS ou código do equipamento"
-                    >
-
-                    <button onclick="buscarDashboard()">
-                        Buscar
-                    </button>
-                </div>
-
-                <div id="resultadoDashboard"></div>
-            </div>
-
-        </section>
+</header>
 
 
-        <!-- REGISTRO DE RETIRADA -->
-        <section id="retirada" class="pagina">
+<nav class="menu">
 
-            <div class="pagina-header">
-                <div>
-                    <h2>Registro de retirada</h2>
-                    <p>Registre a retirada de um equipamento.</p>
-                </div>
-            </div>
+    <button class="menu-btn active" onclick="mostrarPagina('dashboard')">
+        Dashboard
+    </button>
 
-            <div class="painel">
+    <button class="menu-btn" onclick="mostrarPagina('retirada')">
+        Registro de retirada
+    </button>
 
-                <div class="form-grid">
+    <button class="menu-btn" onclick="mostrarPagina('historico')">
+        Histórico
+    </button>
 
-                    <div class="campo">
-                        <label for="lms">LMS do colaborador</label>
-                        <input
-                            type="text"
-                            id="lms"
-                            placeholder="Ex.: LMS123456"
-                        >
-                    </div>
-
-                    <div class="campo">
-                        <label for="codigo">Código do equipamento</label>
-                        <input
-                            type="text"
-                            id="codigo"
-                            placeholder="Ex.: EQP001234"
-                        >
-                    </div>
-
-                </div>
-
-                <div class="acoes">
-                    <button class="btn-principal" onclick="registrarRetirada()">
-                        Registrar retirada
-                    </button>
-
-                    <button class="btn-secundario" onclick="buscarRetirada()">
-                        Buscar
-                    </button>
-                </div>
-
-                <div id="resultadoRetirada"></div>
-
-            </div>
-
-        </section>
+</nav>
 
 
-        <!-- HISTÓRICO -->
-        <section id="historico" class="pagina">
+<main>
 
-            <div class="pagina-header">
-                <div>
-                    <h2>Histórico</h2>
-                    <p>Consulte e gerencie os registros.</p>
-                </div>
-            </div>
 
-            <div class="painel">
+<!-- =========================
+     DASHBOARD
+========================= -->
 
-                <div class="busca">
-                    <input
-                        type="text"
-                        id="buscaHistorico"
-                        placeholder="Buscar por LMS ou código do equipamento"
-                    >
+<section id="dashboard" class="pagina active">
 
-                    <button onclick="carregarHistorico()">
-                        Buscar
-                    </button>
+    <div class="pagina-header">
 
-                    <button class="btn-secundario" onclick="mostrarTodos()">
-                        Mostrar todos
-                    </button>
-                </div>
+        <div>
+            <h2>Dashboard</h2>
+            <p>Visão geral dos equipamentos.</p>
+        </div>
 
-                <div class="tabela-container">
+    </div>
 
-                    <table>
 
-                        <thead>
-                            <tr>
-                                <th>LMS</th>
-                                <th>Equipamento</th>
-                                <th>Retirada</th>
-                                <th>Devolução</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
+    <div class="cards">
 
-                        <tbody id="tabelaHistorico"></tbody>
+        <div class="card amarelo">
 
-                    </table>
+            <span>Total retirados</span>
 
-                </div>
+            <strong id="totalRetirados">
+                0
+            </strong>
 
-            </div>
+        </div>
 
-        </section>
 
-    </main>
+        <div class="card verde">
 
-    <div id="modalEdicao" class="modal">
+            <span>Devolvidos</span>
 
-        <div class="modal-content">
+            <strong id="totalDevolvidos">
+                0
+            </strong>
 
-            <div class="modal-header">
-                <h3>Editar registro</h3>
-                <button onclick="fecharModal()">×</button>
-            </div>
+        </div>
 
-            <input type="hidden" id="editarId">
 
-            <div class="campo">
-                <label>LMS</label>
-                <input type="text" id="editarLms">
-            </div>
+        <div class="card vermelho">
 
-            <div class="campo">
-                <label>Código do equipamento</label>
-                <input type="text" id="editarCodigo">
-            </div>
+            <span>Extraviados</span>
 
-            <div class="campo">
-                <label>Status</label>
-
-                <select id="editarStatus">
-                    <option value="retirado">Retirado</option>
-                    <option value="devolvido">Devolvido</option>
-                    <option value="extraviado">Extraviado</option>
-                </select>
-            </div>
-
-            <div class="modal-acoes">
-                <button class="btn-principal" onclick="salvarEdicao()">
-                    Salvar alterações
-                </button>
-
-                <button class="btn-secundario" onclick="fecharModal()">
-                    Cancelar
-                </button>
-            </div>
+            <strong id="totalExtraviados">
+                0
+            </strong>
 
         </div>
 
     </div>
 
-    <script src="script.js"></script>
+
+    <div class="painel">
+
+        <h3>
+            Buscar equipamento ou colaborador
+        </h3>
+
+
+        <div class="busca">
+
+            <input
+                type="text"
+                id="buscaDashboard"
+                placeholder="Digite LMS, nome ou código do equipamento"
+            >
+
+            <button onclick="buscarDashboard()">
+                Buscar
+            </button>
+
+        </div>
+
+
+        <div id="resultadoDashboard"></div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================
+     REGISTRO DE RETIRADA
+========================= -->
+
+<section id="retirada" class="pagina">
+
+    <div class="pagina-header">
+
+        <div>
+
+            <h2>
+                Registro de retirada
+            </h2>
+
+            <p>
+                Registre a retirada de um equipamento.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="painel">
+
+
+        <div class="form-grid">
+
+
+            <div class="campo">
+
+                <label for="lms">
+                    LMS do colaborador
+                </label>
+
+                <input
+                    type="text"
+                    id="lms"
+                    placeholder="Ex.: LMS123456"
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="nome">
+                    Nome do colaborador
+                </label>
+
+                <input
+                    type="text"
+                    id="nome"
+                    placeholder="Nome completo"
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="codigo">
+                    Código do equipamento
+                </label>
+
+                <input
+                    type="text"
+                    id="codigo"
+                    placeholder="Ex.: EQP001234"
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="observacao">
+                    Observação
+                </label>
+
+                <textarea
+                    id="observacao"
+                    placeholder="Digite uma observação, se necessário..."
+                    rows="3"
+                ></textarea>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="acoes">
+
+            <button
+                class="btn-principal"
+                onclick="registrarRetirada()"
+            >
+                Registrar retirada
+            </button>
+
+
+            <button
+                class="btn-secundario"
+                onclick="buscarRetirada()"
+            >
+                Buscar
+            </button>
+
+        </div>
+
+
+        <div id="resultadoRetirada"></div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================
+     HISTÓRICO
+========================= -->
+
+<section id="historico" class="pagina">
+
+    <div class="pagina-header">
+
+        <div>
+
+            <h2>
+                Histórico
+            </h2>
+
+            <p>
+                Consulte e gerencie os registros.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="painel">
+
+
+        <div class="busca">
+
+            <input
+                type="text"
+                id="buscaHistorico"
+                placeholder="Buscar por LMS, nome ou código"
+            >
+
+
+            <button onclick="carregarHistorico()">
+                Buscar
+            </button>
+
+
+            <button
+                class="btn-secundario"
+                onclick="mostrarTodos()"
+            >
+                Mostrar todos
+            </button>
+
+        </div>
+
+
+        <div class="tabela-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>LMS</th>
+
+                        <th>Colaborador</th>
+
+                        <th>Equipamento</th>
+
+                        <th>Retirada</th>
+
+                        <th>Devolução</th>
+
+                        <th>Status</th>
+
+                        <th>Observação</th>
+
+                        <th>Ações</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="tabelaHistorico"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+</main>
+
+
+
+<!-- =========================
+     MODAL DE EDIÇÃO
+========================= -->
+
+<div id="modalEdicao" class="modal">
+
+    <div class="modal-content">
+
+
+        <div class="modal-header">
+
+            <h3>
+                Editar registro
+            </h3>
+
+
+            <button onclick="fecharModal()">
+                ×
+            </button>
+
+        </div>
+
+
+        <input
+            type="hidden"
+            id="editarId"
+        >
+
+
+        <div class="campo">
+
+            <label>
+                LMS
+            </label>
+
+            <input
+                type="text"
+                id="editarLms"
+            >
+
+        </div>
+
+
+        <div class="campo">
+
+            <label>
+                Nome do colaborador
+            </label>
+
+            <input
+                type="text"
+                id="editarNome"
+            >
+
+        </div>
+
+
+        <div class="campo">
+
+            <label>
+                Código do equipamento
+            </label>
+
+            <input
+                type="text"
+                id="editarCodigo"
+            >
+
+        </div>
+
+
+        <div class="campo">
+
+            <label>
+                Status
+            </label>
+
+            <select id="editarStatus">
+
+                <option value="retirado">
+                    Retirado
+                </option>
+
+                <option value="devolvido">
+                    Devolvido
+                </option>
+
+                <option value="extraviado">
+                    Extraviado
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="campo">
+
+            <label>
+                Observação
+            </label>
+
+            <textarea
+                id="editarObservacao"
+                rows="4"
+                placeholder="Observação..."
+            ></textarea>
+
+        </div>
+
+
+        <div class="modal-acoes">
+
+            <button
+                class="btn-principal"
+                onclick="salvarEdicao()"
+            >
+                Salvar alterações
+            </button>
+
+
+            <button
+                class="btn-secundario"
+                onclick="fecharModal()"
+            >
+                Cancelar
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="script.js"></script>
 
 </body>
 </html>
