@@ -2,7 +2,7 @@
    SUPABASE
 ========================================================= */
 
-const SUPABASE_URL = "COLE_AQUI_SUA_PROJECT_URL";
+const SUPABASE_URL = "sb_publishable_Qlgo3bzEfOZJBLLjyTxMkg_0p6v-Z8n";
 const SUPABASE_ANON_KEY = "COLE_AQUI_SUA_CHAVE_PUBLICA";
 
 const db = window.supabase.createClient(
