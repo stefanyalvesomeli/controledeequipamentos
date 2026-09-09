@@ -1,15 +1,82 @@
 /* =========================================================
+   SUPABASE
+========================================================= */
+
+const SUPABASE_URL = "COLE_AQUI_SUA_PROJECT_URL";
+const SUPABASE_ANON_KEY = "COLE_AQUI_SUA_CHAVE_PUBLICA";
+
+const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
+
+
+/* =========================================================
    DADOS
 ========================================================= */
 
-let registros = JSON.parse(
-    localStorage.getItem("equipamentos")
-) || [];
+let registros = [];
+let colaboradores = [];
 
 
-let colaboradores = JSON.parse(
-    localStorage.getItem("colaboradores")
-) || [];
+/* =========================================================
+   CARREGAR DADOS DO BANCO
+========================================================= */
+
+async function carregarDados() {
+
+    const { data: dadosRegistros, error: erroRegistros } =
+        await db
+            .from("registros")
+            .select("*")
+            .order("id", { ascending: true });
+
+    if (erroRegistros) {
+
+        console.error(
+            "Erro ao carregar registros:",
+            erroRegistros
+        );
+
+        alert(
+            "Não foi possível carregar os registros do banco de dados."
+        );
+
+        return;
+    }
+
+
+    const { data: dadosColaboradores, error: erroColaboradores } =
+        await db
+            .from("colaboradores")
+            .select("*")
+            .order("id", { ascending: true });
+
+    if (erroColaboradores) {
+
+        console.error(
+            "Erro ao carregar colaboradores:",
+            erroColaboradores
+        );
+
+        alert(
+            "Não foi possível carregar os colaboradores do banco de dados."
+        );
+
+        return;
+    }
+
+
+    registros = dadosRegistros || [];
+
+    colaboradores = dadosColaboradores || [];
+
+
+    atualizarDashboard();
+
+    carregarHistorico();
+
+}
 
 
 /* =========================================================
@@ -68,34 +135,10 @@ function mostrarPagina(pagina, botao) {
 
 
 /* =========================================================
-   SALVAR DADOS
-========================================================= */
-
-function salvarDados() {
-
-    localStorage.setItem(
-        "equipamentos",
-        JSON.stringify(registros)
-    );
-
-}
-
-
-function salvarColaboradores() {
-
-    localStorage.setItem(
-        "colaboradores",
-        JSON.stringify(colaboradores)
-    );
-
-}
-
-
-/* =========================================================
    CADASTRO DE COLABORADORES
 ========================================================= */
 
-function cadastrarColaborador() {
+async function cadastrarColaborador() {
 
     const lms = document
         .getElementById("cadastroLms")
@@ -139,18 +182,34 @@ function cadastrarColaborador() {
     }
 
 
-    colaboradores.push({
+    const { data, error } = await db
+        .from("colaboradores")
+        .insert([
+            {
+                lms: lms,
+                nome: nome
+            }
+        ])
+        .select()
+        .single();
 
-        id: Date.now(),
 
-        lms: lms,
+    if (error) {
 
-        nome: nome
+        console.error(
+            "Erro ao cadastrar colaborador:",
+            error
+        );
 
-    });
+        alert(
+            "Erro ao cadastrar colaborador."
+        );
+
+        return;
+    }
 
 
-    salvarColaboradores();
+    colaboradores.push(data);
 
 
     document.getElementById(
@@ -172,7 +231,7 @@ function cadastrarColaborador() {
    LISTAR COLABORADORES
 ========================================================= */
 
-function carregarColaboradores() {
+async function carregarColaboradores() {
 
     const campo = document
         .getElementById("buscaColaborador");
@@ -185,6 +244,26 @@ function carregarColaboradores() {
         .value
         .trim()
         .toLowerCase();
+
+
+    const { data, error } = await db
+        .from("colaboradores")
+        .select("*")
+        .order("id", { ascending: true });
+
+
+    if (error) {
+
+        console.error(
+            "Erro ao carregar colaboradores:",
+            error
+        );
+
+        return;
+    }
+
+
+    colaboradores = data || [];
 
 
     let lista = colaboradores;
@@ -292,7 +371,7 @@ function mostrarTodosColaboradores() {
 
 
 /* =========================================================
-   BUSCAR NOME AUTOMATICAMENTE PELO LMS
+   BUSCAR NOME POR LMS
 ========================================================= */
 
 function buscarNomePorLms() {
@@ -367,7 +446,7 @@ function buscarNomePorLms() {
    REGISTRAR RETIRADA
 ========================================================= */
 
-function registrarRetirada() {
+async function registrarRetirada() {
 
     const lms = document
         .getElementById("lms")
@@ -413,19 +492,34 @@ function registrarRetirada() {
     }
 
 
-    const equipamentoExistente = registros.find(
-        item =>
-
-            item.codigo.toLowerCase() ===
-            codigo.toLowerCase()
-
-            &&
-
-            item.status === "retirado"
-    );
+    const { data: equipamentoExistente, error: erroBusca } =
+        await db
+            .from("registros")
+            .select("*")
+            .ilike("codigo", codigo)
+            .eq("status", "retirado")
+            .limit(1);
 
 
-    if (equipamentoExistente) {
+    if (erroBusca) {
+
+        console.error(
+            "Erro ao verificar equipamento:",
+            erroBusca
+        );
+
+        alert(
+            "Erro ao verificar o equipamento."
+        );
+
+        return;
+    }
+
+
+    if (
+        equipamentoExistente &&
+        equipamentoExistente.length > 0
+    ) {
 
         alert(
             "Este equipamento já está registrado como retirado."
@@ -435,35 +529,39 @@ function registrarRetirada() {
     }
 
 
-    const agora = new Date();
+    const { data, error } = await db
+        .from("registros")
+        .insert([
+            {
+                lms: lms,
+                nome: nome,
+                codigo: codigo,
+                observacao: observacao || null,
+                retirada: new Date().toISOString(),
+                devolucao: null,
+                status: "retirado"
+            }
+        ])
+        .select()
+        .single();
 
 
-    const registro = {
+    if (error) {
 
-        id: Date.now(),
+        console.error(
+            "Erro ao registrar retirada:",
+            error
+        );
 
-        lms: lms,
+        alert(
+            "Erro ao registrar a retirada."
+        );
 
-        nome: nome,
-
-        codigo: codigo,
-
-        observacao: observacao,
-
-        retirada:
-            agora.toISOString(),
-
-        devolucao: null,
-
-        status: "retirado"
-
-    };
+        return;
+    }
 
 
-    registros.push(registro);
-
-
-    salvarDados();
+    registros.push(data);
 
 
     document.getElementById("lms").value = "";
@@ -802,13 +900,39 @@ function buscarRetirada() {
    HISTÓRICO
 ========================================================= */
 
-function carregarHistorico() {
+async function carregarHistorico() {
 
-    const termo = document
-        .getElementById("buscaHistorico")
+    const campo = document
+        .getElementById("buscaHistorico");
+
+
+    if (!campo) return;
+
+
+    const termo = campo
         .value
         .trim()
         .toLowerCase();
+
+
+    const { data, error } = await db
+        .from("registros")
+        .select("*")
+        .order("id", { ascending: true });
+
+
+    if (error) {
+
+        console.error(
+            "Erro ao carregar histórico:",
+            error
+        );
+
+        return;
+    }
+
+
+    registros = data || [];
 
 
     let lista = registros;
@@ -972,7 +1096,7 @@ function mostrarTodos() {
 function abrirEdicao(id) {
 
     const registro = registros.find(
-        item => item.id === id
+        item => Number(item.id) === Number(id)
     );
 
 
@@ -1017,7 +1141,7 @@ function abrirEdicao(id) {
 }
 
 
-function salvarEdicao() {
+async function salvarEdicao() {
 
     const id = Number(
         document.getElementById(
@@ -1026,33 +1150,25 @@ function salvarEdicao() {
     );
 
 
-    const registro = registros.find(
-        item => item.id === id
-    );
-
-
-    if (!registro) return;
-
-
-    registro.lms = document
+    const lms = document
         .getElementById("editarLms")
         .value
         .trim();
 
 
-    registro.nome = document
+    const nome = document
         .getElementById("editarNome")
         .value
         .trim();
 
 
-    registro.codigo = document
+    const codigo = document
         .getElementById("editarCodigo")
         .value
         .trim();
 
 
-    registro.observacao = document
+    const observacao = document
         .getElementById("editarObservacao")
         .value
         .trim();
@@ -1064,15 +1180,33 @@ function salvarEdicao() {
         ).value;
 
 
-    registro.status = novoStatus;
+    if (!lms || !nome || !codigo) {
+
+        alert(
+            "Preencha o LMS, nome e código do equipamento."
+        );
+
+        return;
+    }
+
+
+    const registro = registros.find(
+        item => Number(item.id) === id
+    );
+
+
+    if (!registro) return;
+
+
+    let devolucao = registro.devolucao;
 
 
     if (
         novoStatus === "devolvido" &&
-        !registro.devolucao
+        !devolucao
     ) {
 
-        registro.devolucao =
+        devolucao =
             new Date().toISOString();
 
     }
@@ -1082,19 +1216,64 @@ function salvarEdicao() {
         novoStatus !== "devolvido"
     ) {
 
-        registro.devolucao = null;
+        devolucao = null;
 
     }
 
 
-    salvarDados();
+    const { data, error } = await db
+        .from("registros")
+        .update({
+
+            lms: lms,
+
+            nome: nome,
+
+            codigo: codigo,
+
+            observacao:
+                observacao || null,
+
+            status: novoStatus,
+
+            devolucao: devolucao
+
+        })
+        .eq("id", id)
+        .select()
+        .single();
+
+
+    if (error) {
+
+        console.error(
+            "Erro ao editar registro:",
+            error
+        );
+
+        alert(
+            "Erro ao salvar as alterações."
+        );
+
+        return;
+    }
+
+
+    const indice = registros.findIndex(
+        item => Number(item.id) === id
+    );
+
+
+    if (indice !== -1) {
+
+        registros[indice] = data;
+
+    }
 
 
     fecharModal();
 
-
     atualizarDashboard();
-
 
     carregarHistorico();
 
@@ -1118,7 +1297,7 @@ function fecharModal() {
    EXCLUIR REGISTRO
 ========================================================= */
 
-function excluirRegistro(id) {
+async function excluirRegistro(id) {
 
     const confirmar = confirm(
         "Tem certeza que deseja excluir este registro?"
@@ -1128,16 +1307,33 @@ function excluirRegistro(id) {
     if (!confirmar) return;
 
 
+    const { error } = await db
+        .from("registros")
+        .delete()
+        .eq("id", id);
+
+
+    if (error) {
+
+        console.error(
+            "Erro ao excluir registro:",
+            error
+        );
+
+        alert(
+            "Erro ao excluir o registro."
+        );
+
+        return;
+    }
+
+
     registros = registros.filter(
-        item => item.id !== id
+        item => Number(item.id) !== Number(id)
     );
 
 
-    salvarDados();
-
-
     atualizarDashboard();
-
 
     carregarHistorico();
 
@@ -1152,7 +1348,7 @@ function abrirEdicaoColaborador(id) {
 
     const colaborador =
         colaboradores.find(
-            item => item.id === id
+            item => Number(item.id) === Number(id)
         );
 
 
@@ -1183,7 +1379,7 @@ function abrirEdicaoColaborador(id) {
 }
 
 
-function salvarEdicaoColaborador() {
+async function salvarEdicaoColaborador() {
 
     const id = Number(
         document.getElementById(
@@ -1221,7 +1417,7 @@ function salvarEdicaoColaborador() {
     const outroColaborador =
         colaboradores.find(
             item =>
-                item.id !== id &&
+                Number(item.id) !== id &&
                 item.lms.toLowerCase() ===
                 lms.toLowerCase()
         );
@@ -1239,7 +1435,7 @@ function salvarEdicaoColaborador() {
 
     const colaborador =
         colaboradores.find(
-            item => item.id === id
+            item => Number(item.id) === id
         );
 
 
@@ -1250,9 +1446,32 @@ function salvarEdicaoColaborador() {
         colaborador.lms;
 
 
-    colaborador.lms = lms;
+    const { error: erroColaborador } =
+        await db
+            .from("colaboradores")
+            .update({
 
-    colaborador.nome = nome;
+                lms: lms,
+
+                nome: nome
+
+            })
+            .eq("id", id);
+
+
+    if (erroColaborador) {
+
+        console.error(
+            "Erro ao editar colaborador:",
+            erroColaborador
+        );
+
+        alert(
+            "Erro ao salvar o colaborador."
+        );
+
+        return;
+    }
 
 
     /*
@@ -1260,29 +1479,73 @@ function salvarEdicaoColaborador() {
        desse colaborador.
     */
 
-    registros.forEach(registro => {
+    const { error: erroRegistros } =
+        await db
+            .from("registros")
+            .update({
 
-        if (
-            registro.lms.toLowerCase() ===
-            lmsAntigo.toLowerCase()
-        ) {
+                lms: lms,
 
-            registro.lms = lms;
+                nome: nome
 
-            registro.nome = nome;
-
-        }
-
-    });
+            })
+            .ilike("lms", lmsAntigo);
 
 
-    salvarColaboradores();
+    if (erroRegistros) {
 
-    salvarDados();
+        console.error(
+            "Erro ao atualizar registros:",
+            erroRegistros
+        );
+
+        alert(
+            "O colaborador foi atualizado, mas ocorreu um erro ao atualizar os registros antigos."
+        );
+
+    }
+
+
+    colaboradores =
+        colaboradores.map(item => {
+
+            if (Number(item.id) === id) {
+
+                return {
+                    ...item,
+                    lms: lms,
+                    nome: nome
+                };
+
+            }
+
+            return item;
+
+        });
+
+
+    registros =
+        registros.map(item => {
+
+            if (
+                item.lms.toLowerCase() ===
+                lmsAntigo.toLowerCase()
+            ) {
+
+                return {
+                    ...item,
+                    lms: lms,
+                    nome: nome
+                };
+
+            }
+
+            return item;
+
+        });
 
 
     fecharModalColaborador();
-
 
     carregarColaboradores();
 
@@ -1312,11 +1575,11 @@ function fecharModalColaborador() {
    EXCLUIR COLABORADOR
 ========================================================= */
 
-function excluirColaborador(id) {
+async function excluirColaborador(id) {
 
     const colaborador =
         colaboradores.find(
-            item => item.id === id
+            item => Number(item.id) === Number(id)
         );
 
 
@@ -1333,13 +1596,31 @@ function excluirColaborador(id) {
     if (!confirmar) return;
 
 
-    colaboradores =
-        colaboradores.filter(
-            item => item.id !== id
+    const { error } = await db
+        .from("colaboradores")
+        .delete()
+        .eq("id", id);
+
+
+    if (error) {
+
+        console.error(
+            "Erro ao excluir colaborador:",
+            error
         );
 
+        alert(
+            "Erro ao excluir o colaborador."
+        );
 
-    salvarColaboradores();
+        return;
+    }
+
+
+    colaboradores =
+        colaboradores.filter(
+            item => Number(item.id) !== Number(id)
+        );
 
 
     carregarColaboradores();
@@ -1396,13 +1677,15 @@ function formatarData(data) {
 
 
 /* =========================================================
-   SEGURANÇA BÁSICA PARA TEXTO INSERIDO NA TABELA
+   SEGURANÇA BÁSICA
 ========================================================= */
 
 function escaparHTML(texto) {
 
-    if (texto === undefined ||
-        texto === null) {
+    if (
+        texto === undefined ||
+        texto === null
+    ) {
 
         return "";
 
@@ -1423,6 +1706,11 @@ function escaparHTML(texto) {
    INICIALIZAÇÃO
 ========================================================= */
 
-atualizarDashboard();
+document.addEventListener(
+    "DOMContentLoaded",
+    async () => {
 
-carregarHistorico();
+        await carregarDados();
+
+    }
+);
