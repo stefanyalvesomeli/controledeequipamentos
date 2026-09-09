@@ -2,8 +2,8 @@
    SUPABASE
 ========================================================= */
 
-const SUPABASE_URL = "sb_publishable_Qlgo3bzEfOZJBLLjyTxMkg_0p6v-Z8n";
-const SUPABASE_ANON_KEY = "COLE_AQUI_SUA_CHAVE_PUBLICA";
+const SUPABASE_URL = "SUA_PROJECT_URL";
+const SUPABASE_ANON_KEY = "sb_publishable_Qlgo3bzEfOZJBLLjyTxMkg_0p6v-Z8n";
 
 const db = window.supabase.createClient(
     SUPABASE_URL,
