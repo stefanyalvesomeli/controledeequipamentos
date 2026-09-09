@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Controle de Equipamentos</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -27,17 +29,40 @@
 </header>
 
 
+<!-- =========================
+     MENU
+========================= -->
+
 <nav class="menu">
 
-    <button class="menu-btn active" onclick="mostrarPagina('dashboard')">
+    <button
+        class="menu-btn active"
+        onclick="mostrarPagina('dashboard', this)"
+    >
         Dashboard
     </button>
 
-    <button class="menu-btn" onclick="mostrarPagina('retirada')">
+
+    <button
+        class="menu-btn"
+        onclick="mostrarPagina('colaboradores', this)"
+    >
+        Colaboradores
+    </button>
+
+
+    <button
+        class="menu-btn"
+        onclick="mostrarPagina('retirada', this)"
+    >
         Registro de retirada
     </button>
 
-    <button class="menu-btn" onclick="mostrarPagina('historico')">
+
+    <button
+        class="menu-btn"
+        onclick="mostrarPagina('historico', this)"
+    >
         Histórico
     </button>
 
@@ -56,8 +81,13 @@
     <div class="pagina-header">
 
         <div>
+
             <h2>Dashboard</h2>
-            <p>Visão geral dos equipamentos.</p>
+
+            <p>
+                Visão geral dos equipamentos.
+            </p>
+
         </div>
 
     </div>
@@ -67,7 +97,9 @@
 
         <div class="card amarelo">
 
-            <span>Total retirados</span>
+            <span>
+                Total retirados
+            </span>
 
             <strong id="totalRetirados">
                 0
@@ -78,7 +110,9 @@
 
         <div class="card verde">
 
-            <span>Devolvidos</span>
+            <span>
+                Devolvidos
+            </span>
 
             <strong id="totalDevolvidos">
                 0
@@ -89,7 +123,9 @@
 
         <div class="card vermelho">
 
-            <span>Extraviados</span>
+            <span>
+                Extraviados
+            </span>
 
             <strong id="totalExtraviados">
                 0
@@ -115,6 +151,7 @@
                 placeholder="Digite LMS, nome ou código do equipamento"
             >
 
+
             <button onclick="buscarDashboard()">
                 Buscar
             </button>
@@ -123,6 +160,152 @@
 
 
         <div id="resultadoDashboard"></div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================
+     COLABORADORES
+========================= -->
+
+<section id="colaboradores" class="pagina">
+
+    <div class="pagina-header">
+
+        <div>
+
+            <h2>
+                Colaboradores
+            </h2>
+
+            <p>
+                Cadastre o LMS e o nome dos colaboradores.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="painel">
+
+        <h3>
+            Novo colaborador
+        </h3>
+
+
+        <div class="form-grid">
+
+            <div class="campo">
+
+                <label for="cadastroLms">
+                    LMS
+                </label>
+
+                <input
+                    type="text"
+                    id="cadastroLms"
+                    placeholder="Ex.: LMS123456"
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="cadastroNome">
+                    Nome do colaborador
+                </label>
+
+                <input
+                    type="text"
+                    id="cadastroNome"
+                    placeholder="Nome completo"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="acoes">
+
+            <button
+                class="btn-principal"
+                onclick="cadastrarColaborador()"
+            >
+                Cadastrar colaborador
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="painel">
+
+        <h3>
+            Colaboradores cadastrados
+        </h3>
+
+
+        <div class="busca">
+
+            <input
+                type="text"
+                id="buscaColaborador"
+                placeholder="Buscar por LMS ou nome"
+            >
+
+
+            <button onclick="carregarColaboradores()">
+                Buscar
+            </button>
+
+
+            <button
+                class="btn-secundario"
+                onclick="mostrarTodosColaboradores()"
+            >
+                Mostrar todos
+            </button>
+
+        </div>
+
+
+        <div class="tabela-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            LMS
+                        </th>
+
+                        <th>
+                            Nome
+                        </th>
+
+                        <th>
+                            Ações
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="tabelaColaboradores"></tbody>
+
+            </table>
+
+        </div>
 
     </div>
 
@@ -155,9 +338,10 @@
 
     <div class="painel">
 
-
         <div class="form-grid">
 
+
+            <!-- LMS -->
 
             <div class="campo">
 
@@ -168,11 +352,20 @@
                 <input
                     type="text"
                     id="lms"
-                    placeholder="Ex.: LMS123456"
+                    placeholder="Digite o LMS"
+                    oninput="buscarNomePorLms()"
+                    autocomplete="off"
                 >
+
+                <small
+                    id="statusLms"
+                    class="status-lms"
+                ></small>
 
             </div>
 
+
+            <!-- NOME AUTOMÁTICO -->
 
             <div class="campo">
 
@@ -183,11 +376,14 @@
                 <input
                     type="text"
                     id="nome"
-                    placeholder="Nome completo"
+                    placeholder="O nome será preenchido automaticamente"
+                    readonly
                 >
 
             </div>
 
+
+            <!-- EQUIPAMENTO -->
 
             <div class="campo">
 
@@ -204,6 +400,8 @@
             </div>
 
 
+            <!-- OBSERVAÇÃO -->
+
             <div class="campo">
 
                 <label for="observacao">
@@ -212,12 +410,11 @@
 
                 <textarea
                     id="observacao"
-                    placeholder="Digite uma observação, se necessário..."
                     rows="3"
+                    placeholder="Digite uma observação, se necessário..."
                 ></textarea>
 
             </div>
-
 
         </div>
 
@@ -344,13 +541,93 @@
 
 
 <!-- =========================
-     MODAL DE EDIÇÃO
+     MODAL - EDITAR COLABORADOR
+========================= -->
+
+<div id="modalColaborador" class="modal">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h3>
+                Editar colaborador
+            </h3>
+
+
+            <button onclick="fecharModalColaborador()">
+                ×
+            </button>
+
+        </div>
+
+
+        <input
+            type="hidden"
+            id="editarColaboradorId"
+        >
+
+
+        <div class="campo">
+
+            <label>
+                LMS
+            </label>
+
+            <input
+                type="text"
+                id="editarColaboradorLms"
+            >
+
+        </div>
+
+
+        <div class="campo">
+
+            <label>
+                Nome do colaborador
+            </label>
+
+            <input
+                type="text"
+                id="editarColaboradorNome"
+            >
+
+        </div>
+
+
+        <div class="modal-acoes">
+
+            <button
+                class="btn-principal"
+                onclick="salvarEdicaoColaborador()"
+            >
+                Salvar alterações
+            </button>
+
+
+            <button
+                class="btn-secundario"
+                onclick="fecharModalColaborador()"
+            >
+                Cancelar
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================
+     MODAL - EDITAR REGISTRO
 ========================= -->
 
 <div id="modalEdicao" class="modal">
 
     <div class="modal-content">
-
 
         <div class="modal-header">
 
