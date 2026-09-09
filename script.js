@@ -1,39 +1,75 @@
+/* =========================================================
+   DADOS
+========================================================= */
+
 let registros = JSON.parse(
     localStorage.getItem("equipamentos")
 ) || [];
 
 
-/* =========================
-   NAVEGAÇÃO
-========================= */
+let colaboradores = JSON.parse(
+    localStorage.getItem("colaboradores")
+) || [];
 
-function mostrarPagina(pagina) {
+
+/* =========================================================
+   NAVEGAÇÃO
+========================================================= */
+
+function mostrarPagina(pagina, botao) {
 
     document.querySelectorAll(".pagina").forEach(section => {
+
         section.classList.remove("active");
+
     });
+
 
     document.querySelectorAll(".menu-btn").forEach(button => {
+
         button.classList.remove("active");
+
     });
 
-    document.getElementById(pagina).classList.add("active");
 
-    event.target.classList.add("active");
+    document
+        .getElementById(pagina)
+        .classList.add("active");
+
+
+    if (botao) {
+
+        botao.classList.add("active");
+
+    }
+
 
     if (pagina === "dashboard") {
+
         atualizarDashboard();
+
     }
 
-    if (pagina === "historico") {
-        carregarHistorico();
+
+    if (pagina === "colaboradores") {
+
+        carregarColaboradores();
+
     }
+
+
+    if (pagina === "historico") {
+
+        carregarHistorico();
+
+    }
+
 }
 
 
-/* =========================
-   SALVAR
-========================= */
+/* =========================================================
+   SALVAR DADOS
+========================================================= */
 
 function salvarDados() {
 
@@ -41,12 +77,295 @@ function salvarDados() {
         "equipamentos",
         JSON.stringify(registros)
     );
+
 }
 
 
-/* =========================
+function salvarColaboradores() {
+
+    localStorage.setItem(
+        "colaboradores",
+        JSON.stringify(colaboradores)
+    );
+
+}
+
+
+/* =========================================================
+   CADASTRO DE COLABORADORES
+========================================================= */
+
+function cadastrarColaborador() {
+
+    const lms = document
+        .getElementById("cadastroLms")
+        .value
+        .trim();
+
+
+    const nome = document
+        .getElementById("cadastroNome")
+        .value
+        .trim();
+
+
+    if (!lms || !nome) {
+
+        alert(
+            "Preencha o LMS e o nome do colaborador."
+        );
+
+        return;
+    }
+
+
+    const lmsNormalizado = lms.toLowerCase();
+
+
+    const existente = colaboradores.find(
+        colaborador =>
+            colaborador.lms.toLowerCase() ===
+            lmsNormalizado
+    );
+
+
+    if (existente) {
+
+        alert(
+            "Este LMS já está cadastrado."
+        );
+
+        return;
+    }
+
+
+    colaboradores.push({
+
+        id: Date.now(),
+
+        lms: lms,
+
+        nome: nome
+
+    });
+
+
+    salvarColaboradores();
+
+
+    document.getElementById(
+        "cadastroLms"
+    ).value = "";
+
+
+    document.getElementById(
+        "cadastroNome"
+    ).value = "";
+
+
+    carregarColaboradores();
+
+}
+
+
+/* =========================================================
+   LISTAR COLABORADORES
+========================================================= */
+
+function carregarColaboradores() {
+
+    const campo = document
+        .getElementById("buscaColaborador");
+
+
+    if (!campo) return;
+
+
+    const termo = campo
+        .value
+        .trim()
+        .toLowerCase();
+
+
+    let lista = colaboradores;
+
+
+    if (termo) {
+
+        lista = colaboradores.filter(
+            colaborador =>
+
+                colaborador.lms
+                    .toLowerCase()
+                    .includes(termo)
+
+                ||
+
+                colaborador.nome
+                    .toLowerCase()
+                    .includes(termo)
+        );
+
+    }
+
+
+    const tabela = document
+        .getElementById(
+            "tabelaColaboradores"
+        );
+
+
+    if (!lista.length) {
+
+        tabela.innerHTML = `
+
+            <tr>
+
+                <td colspan="3">
+                    Nenhum colaborador encontrado.
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+    }
+
+
+    tabela.innerHTML = lista
+        .slice()
+        .reverse()
+        .map(colaborador => `
+
+            <tr>
+
+                <td>
+                    ${escaparHTML(colaborador.lms)}
+                </td>
+
+                <td>
+                    ${escaparHTML(colaborador.nome)}
+                </td>
+
+                <td>
+
+                    <button
+                        class="btn-editar"
+                        onclick="abrirEdicaoColaborador(${colaborador.id})"
+                    >
+                        Editar
+                    </button>
+
+
+                    <button
+                        class="btn-excluir"
+                        onclick="excluirColaborador(${colaborador.id})"
+                    >
+                        Excluir
+                    </button>
+
+                </td>
+
+            </tr>
+
+        `)
+        .join("");
+
+}
+
+
+/* =========================================================
+   MOSTRAR TODOS OS COLABORADORES
+========================================================= */
+
+function mostrarTodosColaboradores() {
+
+    document.getElementById(
+        "buscaColaborador"
+    ).value = "";
+
+
+    carregarColaboradores();
+
+}
+
+
+/* =========================================================
+   BUSCAR NOME AUTOMATICAMENTE PELO LMS
+========================================================= */
+
+function buscarNomePorLms() {
+
+    const campoLms = document
+        .getElementById("lms");
+
+
+    const campoNome = document
+        .getElementById("nome");
+
+
+    const status = document
+        .getElementById("statusLms");
+
+
+    const lms = campoLms
+        .value
+        .trim()
+        .toLowerCase();
+
+
+    campoNome.value = "";
+
+    status.textContent = "";
+
+    status.className = "status-lms";
+
+
+    if (!lms) {
+
+        return;
+    }
+
+
+    const colaborador = colaboradores.find(
+        item =>
+            item.lms.toLowerCase() === lms
+    );
+
+
+    if (colaborador) {
+
+        campoNome.value =
+            colaborador.nome;
+
+
+        status.textContent =
+            "Colaborador encontrado";
+
+
+        status.classList.add(
+            "sucesso"
+        );
+
+    } else {
+
+        status.textContent =
+            "LMS não cadastrado";
+
+
+        status.classList.add(
+            "erro"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
    REGISTRAR RETIRADA
-========================= */
+========================================================= */
 
 function registrarRetirada() {
 
@@ -55,15 +374,18 @@ function registrarRetirada() {
         .value
         .trim();
 
+
     const nome = document
         .getElementById("nome")
         .value
         .trim();
 
+
     const codigo = document
         .getElementById("codigo")
         .value
         .trim();
+
 
     const observacao = document
         .getElementById("observacao")
@@ -71,10 +393,20 @@ function registrarRetirada() {
         .trim();
 
 
-    if (!lms || !nome || !codigo) {
+    if (!lms || !codigo) {
 
         alert(
-            "Preencha o LMS, nome do colaborador e código do equipamento."
+            "Preencha o LMS e o código do equipamento."
+        );
+
+        return;
+    }
+
+
+    if (!nome) {
+
+        alert(
+            "O LMS informado não está cadastrado. Cadastre o colaborador primeiro."
         );
 
         return;
@@ -83,7 +415,12 @@ function registrarRetirada() {
 
     const equipamentoExistente = registros.find(
         item =>
-            item.codigo.toLowerCase() === codigo.toLowerCase() &&
+
+            item.codigo.toLowerCase() ===
+            codigo.toLowerCase()
+
+            &&
+
             item.status === "retirado"
     );
 
@@ -113,7 +450,8 @@ function registrarRetirada() {
 
         observacao: observacao,
 
-        retirada: agora.toISOString(),
+        retirada:
+            agora.toISOString(),
 
         devolucao: null,
 
@@ -123,6 +461,7 @@ function registrarRetirada() {
 
 
     registros.push(registro);
+
 
     salvarDados();
 
@@ -135,20 +474,22 @@ function registrarRetirada() {
 
     document.getElementById("observacao").value = "";
 
+    document.getElementById("statusLms").textContent = "";
+
+    document.getElementById("statusLms").className =
+        "status-lms";
+
 
     atualizarDashboard();
 
     carregarHistorico();
 
-    /*
-       O alerta de confirmação foi removido.
-    */
 }
 
 
-/* =========================
+/* =========================================================
    DASHBOARD
-========================= */
+========================================================= */
 
 function atualizarDashboard() {
 
@@ -180,12 +521,13 @@ function atualizarDashboard() {
     document.getElementById(
         "totalExtraviados"
     ).textContent = extraviados;
+
 }
 
 
-/* =========================
+/* =========================================================
    BUSCA DASHBOARD
-========================= */
+========================================================= */
 
 function buscarDashboard() {
 
@@ -196,9 +538,10 @@ function buscarDashboard() {
         .toLowerCase();
 
 
-    const resultado = document.getElementById(
-        "resultadoDashboard"
-    );
+    const resultado = document
+        .getElementById(
+            "resultadoDashboard"
+        );
 
 
     if (!termo) {
@@ -209,18 +552,28 @@ function buscarDashboard() {
     }
 
 
-    const encontrados = registros.filter(item =>
+    const encontrados = registros.filter(
+        item =>
 
-        item.lms.toLowerCase().includes(termo) ||
+            item.lms
+                .toLowerCase()
+                .includes(termo)
 
-        item.nome.toLowerCase().includes(termo) ||
+            ||
 
-        item.codigo.toLowerCase().includes(termo)
+            item.nome
+                .toLowerCase()
+                .includes(termo)
 
+            ||
+
+            item.codigo
+                .toLowerCase()
+                .includes(termo)
     );
 
 
-    if (encontrados.length === 0) {
+    if (!encontrados.length) {
 
         resultado.innerHTML = `
 
@@ -234,65 +587,76 @@ function buscarDashboard() {
     }
 
 
-    resultado.innerHTML = encontrados.map(item => `
+    resultado.innerHTML =
+        encontrados
+            .map(item => `
 
-        <div class="resultado">
+                <div class="resultado">
 
-            <strong>
-                ${item.nome}
-            </strong>
+                    <strong>
+                        ${escaparHTML(item.nome)}
+                    </strong>
 
-            <div>
-                LMS: ${item.lms}
-            </div>
-
-            <div>
-                Equipamento: ${item.codigo}
-            </div>
-
-            <div>
-                Status:
-
-                <span class="status ${item.status}">
-                    ${formatarStatus(item.status)}
-                </span>
-
-            </div>
-
-            <div>
-                Retirada:
-                ${formatarData(item.retirada)}
-            </div>
-
-            <div>
-                Devolução:
-                ${
-                    item.devolucao
-                    ? formatarData(item.devolucao)
-                    : "-"
-                }
-            </div>
-
-            ${
-                item.observacao
-                ? `
                     <div>
-                        Observação:
-                        ${item.observacao}
+                        LMS:
+                        ${escaparHTML(item.lms)}
                     </div>
-                `
-                : ""
-            }
 
-        </div>
+                    <div>
+                        Equipamento:
+                        ${escaparHTML(item.codigo)}
+                    </div>
 
-    `).join("");
+                    <div>
+
+                        Status:
+
+                        <span
+                            class="status ${item.status}"
+                        >
+                            ${formatarStatus(item.status)}
+                        </span>
+
+                    </div>
+
+                    <div>
+                        Retirada:
+                        ${formatarData(item.retirada)}
+                    </div>
+
+                    <div>
+                        Devolução:
+                        ${
+                            item.devolucao
+                            ? formatarData(item.devolucao)
+                            : "-"
+                        }
+                    </div>
+
+                    ${
+                        item.observacao
+                        ?
+                        `
+                            <div>
+                                Observação:
+                                ${escaparHTML(item.observacao)}
+                            </div>
+                        `
+                        :
+                        ""
+                    }
+
+                </div>
+
+            `)
+            .join("");
+
 }
 
 
-/* =========================
+/* =========================================================
    BUSCA NA RETIRADA
-========================= */
+========================================================= */
 
 function buscarRetirada() {
 
@@ -317,9 +681,10 @@ function buscarRetirada() {
         .toLowerCase();
 
 
-    const resultado = document.getElementById(
-        "resultadoRetirada"
-    );
+    const resultado = document
+        .getElementById(
+            "resultadoRetirada"
+        );
 
 
     if (!lms && !codigo && !nome) {
@@ -330,18 +695,31 @@ function buscarRetirada() {
     }
 
 
-    const encontrados = registros.filter(item =>
+    const encontrados = registros.filter(
+        item =>
 
-        (lms && item.lms.toLowerCase().includes(lms)) ||
+            (lms &&
+                item.lms
+                    .toLowerCase()
+                    .includes(lms))
 
-        (codigo && item.codigo.toLowerCase().includes(codigo)) ||
+            ||
 
-        (nome && item.nome.toLowerCase().includes(nome))
+            (codigo &&
+                item.codigo
+                    .toLowerCase()
+                    .includes(codigo))
 
+            ||
+
+            (nome &&
+                item.nome
+                    .toLowerCase()
+                    .includes(nome))
     );
 
 
-    if (encontrados.length === 0) {
+    if (!encontrados.length) {
 
         resultado.innerHTML = `
 
@@ -355,60 +733,74 @@ function buscarRetirada() {
     }
 
 
-    resultado.innerHTML = encontrados.map(item => `
+    resultado.innerHTML =
+        encontrados
+            .map(item => `
 
-        <div class="resultado">
+                <div class="resultado">
 
-            <strong>
-                ${item.nome}
-            </strong>
+                    <strong>
+                        ${escaparHTML(item.nome)}
+                    </strong>
 
-            <div>
-                LMS: ${item.lms}
-            </div>
-
-            <div>
-                Equipamento: ${item.codigo}
-            </div>
-
-            <div>
-
-                Status:
-
-                <span class="status ${item.status}">
-                    ${formatarStatus(item.status)}
-                </span>
-
-            </div>
-
-            ${
-                item.observacao
-                ? `
                     <div>
-                        Observação: ${item.observacao}
+                        LMS:
+                        ${escaparHTML(item.lms)}
                     </div>
-                `
-                : ""
-            }
 
-            <br>
+                    <div>
+                        Equipamento:
+                        ${escaparHTML(item.codigo)}
+                    </div>
 
-            <button
-                class="btn-editar"
-                onclick="abrirEdicao(${item.id})"
-            >
-                Editar
-            </button>
+                    <div>
 
-        </div>
+                        Status:
 
-    `).join("");
+                        <span
+                            class="status ${item.status}"
+                        >
+                            ${formatarStatus(item.status)}
+                        </span>
+
+                    </div>
+
+
+                    ${
+                        item.observacao
+                        ?
+                        `
+                            <div>
+                                Observação:
+                                ${escaparHTML(item.observacao)}
+                            </div>
+                        `
+                        :
+                        ""
+                    }
+
+
+                    <br>
+
+
+                    <button
+                        class="btn-editar"
+                        onclick="abrirEdicao(${item.id})"
+                    >
+                        Editar
+                    </button>
+
+                </div>
+
+            `)
+            .join("");
+
 }
 
 
-/* =========================
+/* =========================================================
    HISTÓRICO
-========================= */
+========================================================= */
 
 function carregarHistorico() {
 
@@ -424,25 +816,36 @@ function carregarHistorico() {
 
     if (termo) {
 
-        lista = registros.filter(item =>
+        lista = registros.filter(
+            item =>
 
-            item.lms.toLowerCase().includes(termo) ||
+                item.lms
+                    .toLowerCase()
+                    .includes(termo)
 
-            item.nome.toLowerCase().includes(termo) ||
+                ||
 
-            item.codigo.toLowerCase().includes(termo)
+                item.nome
+                    .toLowerCase()
+                    .includes(termo)
 
+                ||
+
+                item.codigo
+                    .toLowerCase()
+                    .includes(termo)
         );
 
     }
 
 
-    const tabela = document.getElementById(
-        "tabelaHistorico"
-    );
+    const tabela = document
+        .getElementById(
+            "tabelaHistorico"
+        );
 
 
-    if (lista.length === 0) {
+    if (!lista.length) {
 
         tabela.innerHTML = `
 
@@ -460,88 +863,95 @@ function carregarHistorico() {
     }
 
 
-    tabela.innerHTML = lista
-        .slice()
-        .reverse()
-        .map(item => `
+    tabela.innerHTML =
+        lista
+            .slice()
+            .reverse()
+            .map(item => `
 
-        <tr>
+                <tr>
 
-            <td>
-                ${item.lms}
-            </td>
-
-
-            <td>
-                ${item.nome}
-            </td>
+                    <td>
+                        ${escaparHTML(item.lms)}
+                    </td>
 
 
-            <td>
-                ${item.codigo}
-            </td>
+                    <td>
+                        ${escaparHTML(item.nome)}
+                    </td>
 
 
-            <td>
-                ${formatarData(item.retirada)}
-            </td>
+                    <td>
+                        ${escaparHTML(item.codigo)}
+                    </td>
 
 
-            <td>
-                ${
-                    item.devolucao
-                    ? formatarData(item.devolucao)
-                    : "-"
-                }
-            </td>
+                    <td>
+                        ${formatarData(item.retirada)}
+                    </td>
 
 
-            <td>
-
-                <span class="status ${item.status}">
-                    ${formatarStatus(item.status)}
-                </span>
-
-            </td>
-
-
-            <td class="observacao-tabela">
-
-                ${
-                    item.observacao || "-"
-                }
-
-            </td>
+                    <td>
+                        ${
+                            item.devolucao
+                            ? formatarData(item.devolucao)
+                            : "-"
+                        }
+                    </td>
 
 
-            <td>
+                    <td>
 
-                <button
-                    class="btn-editar"
-                    onclick="abrirEdicao(${item.id})"
-                >
-                    Editar
-                </button>
+                        <span
+                            class="status ${item.status}"
+                        >
+                            ${formatarStatus(item.status)}
+                        </span>
+
+                    </td>
 
 
-                <button
-                    class="btn-excluir"
-                    onclick="excluirRegistro(${item.id})"
-                >
-                    Excluir
-                </button>
+                    <td class="observacao-tabela">
 
-            </td>
+                        ${
+                            item.observacao
+                            ? escaparHTML(item.observacao)
+                            : "-"
+                        }
 
-        </tr>
+                    </td>
 
-    `).join("");
+
+                    <td>
+
+                        <button
+                            class="btn-editar"
+                            onclick="abrirEdicao(${item.id})"
+                        >
+                            Editar
+                        </button>
+
+
+                        <button
+                            class="btn-excluir"
+                            onclick="excluirRegistro(${item.id})"
+                        >
+                            Excluir
+                        </button>
+
+                    </td>
+
+                </tr>
+
+            `)
+            .join("");
+
 }
 
 
-/* =========================
+/* =========================================================
    MOSTRAR TODOS
-========================= */
+========================================================= */
 
 function mostrarTodos() {
 
@@ -551,12 +961,13 @@ function mostrarTodos() {
 
 
     carregarHistorico();
+
 }
 
 
-/* =========================
-   EDITAR
-========================= */
+/* =========================================================
+   EDITAR REGISTRO
+========================================================= */
 
 function abrirEdicao(id) {
 
@@ -595,19 +1006,23 @@ function abrirEdicao(id) {
 
     document.getElementById(
         "editarObservacao"
-    ).value = registro.observacao || "";
+    ).value =
+        registro.observacao || "";
 
 
     document
         .getElementById("modalEdicao")
         .classList.add("aberto");
+
 }
 
 
 function salvarEdicao() {
 
     const id = Number(
-        document.getElementById("editarId").value
+        document.getElementById(
+            "editarId"
+        ).value
     );
 
 
@@ -643,9 +1058,10 @@ function salvarEdicao() {
         .trim();
 
 
-    const novoStatus = document
-        .getElementById("editarStatus")
-        .value;
+    const novoStatus =
+        document.getElementById(
+            "editarStatus"
+        ).value;
 
 
     registro.status = novoStatus;
@@ -662,7 +1078,9 @@ function salvarEdicao() {
     }
 
 
-    if (novoStatus !== "devolvido") {
+    if (
+        novoStatus !== "devolvido"
+    ) {
 
         registro.devolucao = null;
 
@@ -671,25 +1089,34 @@ function salvarEdicao() {
 
     salvarDados();
 
+
     fecharModal();
+
 
     atualizarDashboard();
 
+
     carregarHistorico();
+
 }
 
+
+/* =========================================================
+   FECHAR MODAL DE REGISTRO
+========================================================= */
 
 function fecharModal() {
 
     document
         .getElementById("modalEdicao")
         .classList.remove("aberto");
+
 }
 
 
-/* =========================
-   EXCLUIR
-========================= */
+/* =========================================================
+   EXCLUIR REGISTRO
+========================================================= */
 
 function excluirRegistro(id) {
 
@@ -708,15 +1135,221 @@ function excluirRegistro(id) {
 
     salvarDados();
 
+
     atualizarDashboard();
 
+
     carregarHistorico();
+
 }
 
 
-/* =========================
+/* =========================================================
+   EDITAR COLABORADOR
+========================================================= */
+
+function abrirEdicaoColaborador(id) {
+
+    const colaborador =
+        colaboradores.find(
+            item => item.id === id
+        );
+
+
+    if (!colaborador) return;
+
+
+    document.getElementById(
+        "editarColaboradorId"
+    ).value = colaborador.id;
+
+
+    document.getElementById(
+        "editarColaboradorLms"
+    ).value = colaborador.lms;
+
+
+    document.getElementById(
+        "editarColaboradorNome"
+    ).value = colaborador.nome;
+
+
+    document
+        .getElementById(
+            "modalColaborador"
+        )
+        .classList.add("aberto");
+
+}
+
+
+function salvarEdicaoColaborador() {
+
+    const id = Number(
+        document.getElementById(
+            "editarColaboradorId"
+        ).value
+    );
+
+
+    const lms = document
+        .getElementById(
+            "editarColaboradorLms"
+        )
+        .value
+        .trim();
+
+
+    const nome = document
+        .getElementById(
+            "editarColaboradorNome"
+        )
+        .value
+        .trim();
+
+
+    if (!lms || !nome) {
+
+        alert(
+            "Preencha o LMS e o nome."
+        );
+
+        return;
+    }
+
+
+    const outroColaborador =
+        colaboradores.find(
+            item =>
+                item.id !== id &&
+                item.lms.toLowerCase() ===
+                lms.toLowerCase()
+        );
+
+
+    if (outroColaborador) {
+
+        alert(
+            "Este LMS já pertence a outro colaborador."
+        );
+
+        return;
+    }
+
+
+    const colaborador =
+        colaboradores.find(
+            item => item.id === id
+        );
+
+
+    if (!colaborador) return;
+
+
+    const lmsAntigo =
+        colaborador.lms;
+
+
+    colaborador.lms = lms;
+
+    colaborador.nome = nome;
+
+
+    /*
+       Atualiza também os registros antigos
+       desse colaborador.
+    */
+
+    registros.forEach(registro => {
+
+        if (
+            registro.lms.toLowerCase() ===
+            lmsAntigo.toLowerCase()
+        ) {
+
+            registro.lms = lms;
+
+            registro.nome = nome;
+
+        }
+
+    });
+
+
+    salvarColaboradores();
+
+    salvarDados();
+
+
+    fecharModalColaborador();
+
+
+    carregarColaboradores();
+
+    carregarHistorico();
+
+    atualizarDashboard();
+
+}
+
+
+/* =========================================================
+   FECHAR MODAL DE COLABORADOR
+========================================================= */
+
+function fecharModalColaborador() {
+
+    document
+        .getElementById(
+            "modalColaborador"
+        )
+        .classList.remove("aberto");
+
+}
+
+
+/* =========================================================
+   EXCLUIR COLABORADOR
+========================================================= */
+
+function excluirColaborador(id) {
+
+    const colaborador =
+        colaboradores.find(
+            item => item.id === id
+        );
+
+
+    if (!colaborador) return;
+
+
+    const confirmar = confirm(
+
+        `Deseja excluir o colaborador ${colaborador.nome}?`
+
+    );
+
+
+    if (!confirmar) return;
+
+
+    colaboradores =
+        colaboradores.filter(
+            item => item.id !== id
+        );
+
+
+    salvarColaboradores();
+
+
+    carregarColaboradores();
+
+}
+
+
+/* =========================================================
    FORMATAÇÃO
-========================= */
+========================================================= */
 
 function formatarStatus(status) {
 
@@ -732,6 +1365,7 @@ function formatarStatus(status) {
 
 
     return nomes[status] || status;
+
 }
 
 
@@ -740,28 +1374,54 @@ function formatarData(data) {
     if (!data) return "-";
 
 
-    return new Date(data).toLocaleString(
-        "pt-BR",
-        {
+    return new Date(data)
+        .toLocaleString(
+            "pt-BR",
+            {
 
-            day: "2-digit",
+                day: "2-digit",
 
-            month: "2-digit",
+                month: "2-digit",
 
-            year: "numeric",
+                year: "numeric",
 
-            hour: "2-digit",
+                hour: "2-digit",
 
-            minute: "2-digit"
+                minute: "2-digit"
 
-        }
-    );
+            }
+        );
+
 }
 
 
-/* =========================
+/* =========================================================
+   SEGURANÇA BÁSICA PARA TEXTO INSERIDO NA TABELA
+========================================================= */
+
+function escaparHTML(texto) {
+
+    if (texto === undefined ||
+        texto === null) {
+
+        return "";
+
+    }
+
+
+    return String(texto)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/* =========================================================
    INICIALIZAÇÃO
-========================= */
+========================================================= */
 
 atualizarDashboard();
 
