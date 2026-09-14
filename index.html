@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -72,490 +71,473 @@
 
 <main>
 
-    <!-- =========================
-         DASHBOARD
-    ========================= -->
 
-    <section id="dashboard" class="pagina active">
+<!-- =========================
+     DASHBOARD
+========================= -->
 
-        <div class="pagina-header">
+<section id="dashboard" class="pagina active">
 
-            <div>
+    <div class="pagina-header">
 
-                <h2>Dashboard</h2>
+        <div>
 
-                <p>
-                    Visão geral dos equipamentos.
-                </p>
+            <h2>Dashboard</h2>
 
-            </div>
+            <p>
+                Visão geral dos equipamentos.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="cards">
+
+        <div class="card amarelo">
+
+            <span>
+                Total retirados
+            </span>
+
+            <strong id="totalRetirados">
+                0
+            </strong>
 
         </div>
 
 
-        <div class="cards">
+        <div class="card verde">
 
-            <div class="card amarelo">
+            <span>
+                Devolvidos
+            </span>
 
-                <span>
-                    Total retirados
-                </span>
-
-                <strong id="totalRetirados">
-                    0
-                </strong>
-
-            </div>
-
-
-            <div class="card verde">
-
-                <span>
-                    Devolvidos
-                </span>
-
-                <strong id="totalDevolvidos">
-                    0
-                </strong>
-
-            </div>
-
-
-            <div class="card vermelho">
-
-                <span>
-                    Extraviados
-                </span>
-
-                <strong id="totalExtraviados">
-                    0
-                </strong>
-
-            </div>
+            <strong id="totalDevolvidos">
+                0
+            </strong>
 
         </div>
 
 
-        <div class="painel">
+        <div class="card vermelho">
 
-            <h3>
-                Buscar equipamento ou colaborador
-            </h3>
+            <span>
+                Extraviados
+            </span>
+
+            <strong id="totalExtraviados">
+                0
+            </strong>
+
+        </div>
+
+    </div>
 
 
-            <div class="busca">
+    <div class="painel">
+
+        <h3>
+            Buscar equipamento ou colaborador
+        </h3>
+
+
+        <div class="busca">
+
+            <input
+                type="text"
+                id="buscaDashboard"
+                placeholder="Digite LMS, nome ou código do equipamento"
+            >
+
+
+            <button onclick="buscarDashboard()">
+                Buscar
+            </button>
+
+        </div>
+
+
+        <div id="resultadoDashboard"></div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================
+     COLABORADORES
+========================= -->
+
+<section id="colaboradores" class="pagina">
+
+    <div class="pagina-header">
+
+        <div>
+
+            <h2>
+                Colaboradores
+            </h2>
+
+            <p>
+                Cadastre o LMS e o nome dos colaboradores.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="painel">
+
+        <h3>
+            Novo colaborador
+        </h3>
+
+
+        <div class="form-grid">
+
+            <div class="campo">
+
+                <label for="cadastroLms">
+                    LMS
+                </label>
 
                 <input
                     type="text"
-                    id="buscaDashboard"
-                    placeholder="Digite LMS, nome ou código do equipamento"
+                    id="cadastroLms"
+                    placeholder="Ex.: LMS123456"
                 >
 
-
-                <button onclick="buscarDashboard()">
-                    Buscar
-                </button>
-
             </div>
 
 
-            <div id="resultadoDashboard"></div>
+            <div class="campo">
 
-        </div>
-
-    </section>
-
-
-    <!-- =========================
-         COLABORADORES
-    ========================= -->
-
-    <section id="colaboradores" class="pagina">
-
-        <div class="pagina-header">
-
-            <div>
-
-                <h2>
-                    Colaboradores
-                </h2>
-
-                <p>
-                    Cadastre o LMS e o nome dos colaboradores.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="painel">
-
-            <h3>
-                Novo colaborador
-            </h3>
-
-
-            <div class="form-grid">
-
-                <div class="campo">
-
-                    <label for="cadastroLms">
-                        LMS
-                    </label>
-
-                    <input
-                        type="text"
-                        id="cadastroLms"
-                        placeholder="Ex.: LMS123456"
-                    >
-
-                </div>
-
-
-                <div class="campo">
-
-                    <label for="cadastroNome">
-                        Nome do colaborador
-                    </label>
-
-                    <input
-                        type="text"
-                        id="cadastroNome"
-                        placeholder="Nome completo"
-                    >
-
-                </div>
-
-            </div>
-
-
-            <div class="acoes">
-
-                <button
-                    class="btn-principal"
-                    onclick="cadastrarColaborador()"
-                >
-                    Cadastrar colaborador
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <div class="painel">
-
-            <h3>
-                Colaboradores cadastrados
-            </h3>
-
-
-            <div class="busca">
+                <label for="cadastroNome">
+                    Nome do colaborador
+                </label>
 
                 <input
                     type="text"
-                    id="buscaColaborador"
-                    placeholder="Buscar por LMS ou nome"
+                    id="cadastroNome"
+                    placeholder="Nome completo"
                 >
-
-
-                <button onclick="carregarColaboradores()">
-                    Buscar
-                </button>
-
-
-                <button
-                    class="btn-secundario"
-                    onclick="mostrarTodosColaboradores()"
-                >
-                    Mostrar todos
-                </button>
-
-            </div>
-
-
-            <div class="tabela-container">
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-
-                            <th>
-                                LMS
-                            </th>
-
-                            <th>
-                                Nome
-                            </th>
-
-                            <th>
-                                Ações
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody id="tabelaColaboradores"></tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- =========================
-         REGISTRO DE RETIRADA
-    ========================= -->
-
-    <section id="retirada" class="pagina">
-
-        <div class="pagina-header">
-
-            <div>
-
-                <h2>
-                    Registro de retirada
-                </h2>
-
-                <p>
-                    Registre a retirada de um equipamento.
-                </p>
 
             </div>
 
         </div>
 
 
-        <div class="painel">
+        <div class="acoes">
 
-            <div class="form-grid">
-
-                <!-- LMS -->
-
-                <div class="campo">
-
-                    <label for="lms">
-                        LMS do colaborador
-                    </label>
-
-                    <input
-                        type="text"
-                        id="lms"
-                        placeholder="Digite o LMS"
-                        oninput="buscarNomePorLms()"
-                        autocomplete="off"
-                    >
-
-                    <small
-                        id="statusLms"
-                        class="status-lms"
-                    ></small>
-
-                </div>
-
-
-                <!-- NOME AUTOMÁTICO -->
-
-                <div class="campo">
-
-                    <label for="nome">
-                        Nome do colaborador
-                    </label>
-
-                    <input
-                        type="text"
-                        id="nome"
-                        placeholder="O nome será preenchido automaticamente"
-                        readonly
-                    >
-
-                </div>
-
-
-                <!-- EQUIPAMENTO -->
-
-                <div class="campo">
-
-                    <label for="codigo">
-                        Código do equipamento
-                    </label>
-
-                    <input
-                        type="text"
-                        id="codigo"
-                        placeholder="Ex.: EQP001234"
-                    >
-
-                </div>
-
-
-                <!-- OBSERVAÇÃO -->
-
-                <div class="campo">
-
-                    <label for="observacao">
-                        Observação
-                    </label>
-
-                    <textarea
-                        id="observacao"
-                        rows="3"
-                        placeholder="Digite uma observação, se necessário..."
-                    ></textarea>
-
-                </div>
-
-            </div>
-
-
-            <div class="acoes">
-
-                <button
-                    class="btn-principal"
-                    onclick="registrarRetirada()"
-                >
-                    Registrar retirada
-                </button>
-
-
-                <button
-                    class="btn-secundario"
-                    onclick="buscarRetirada()"
-                >
-                    Buscar
-                </button>
-
-            </div>
-
-
-            <div id="resultadoRetirada"></div>
+            <button
+                class="btn-principal"
+                onclick="cadastrarColaborador()"
+            >
+                Cadastrar colaborador
+            </button>
 
         </div>
 
-    </section>
+    </div>
 
 
-    <!-- =========================
-         HISTÓRICO
-    ========================= -->
+    <div class="painel">
 
-    <section id="historico" class="pagina">
+        <h3>
+            Colaboradores cadastrados
+        </h3>
 
-        <div class="pagina-header">
 
-            <div>
+        <div class="busca">
 
-                <h2>
-                    Histórico
-                </h2>
+            <input
+                type="text"
+                id="buscaColaborador"
+                placeholder="Buscar por LMS ou nome"
+            >
 
-                <p>
-                    Consulte e gerencie os registros.
-                </p>
 
-            </div>
+            <button onclick="carregarColaboradores()">
+                Buscar
+            </button>
+
+
+            <button
+                class="btn-secundario"
+                onclick="mostrarTodosColaboradores()"
+            >
+                Mostrar todos
+            </button>
 
         </div>
 
 
-        <div class="painel">
+        <div class="tabela-container">
 
-            <div class="busca">
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            LMS
+                        </th>
+
+                        <th>
+                            Nome
+                        </th>
+
+                        <th>
+                            Ações
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="tabelaColaboradores"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================
+     REGISTRO DE RETIRADA
+========================= -->
+
+<section id="retirada" class="pagina">
+
+    <div class="pagina-header">
+
+        <div>
+
+            <h2>
+                Registro de retirada
+            </h2>
+
+            <p>
+                Registre a retirada de um equipamento.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="painel">
+
+        <div class="form-grid">
+
+
+            <!-- LMS -->
+
+            <div class="campo">
+
+                <label for="lms">
+                    LMS do colaborador
+                </label>
 
                 <input
                     type="text"
-                    id="buscaHistorico"
-                    placeholder="Buscar por LMS, nome ou código"
+                    id="lms"
+                    placeholder="Digite o LMS"
+                    oninput="buscarNomePorLms()"
+                    autocomplete="off"
                 >
 
-
-                <button onclick="carregarHistorico()">
-                    Buscar
-                </button>
-
-
-                <button
-                    class="btn-secundario"
-                    onclick="mostrarTodos()"
-                >
-                    Mostrar todos
-                </button>
+                <small
+                    id="statusLms"
+                    class="status-lms"
+                ></small>
 
             </div>
 
 
-            <div class="tabela-container">
+            <!-- NOME AUTOMÁTICO -->
 
-                <table>
+            <div class="campo">
 
-                    <thead>
+                <label for="nome">
+                    Nome do colaborador
+                </label>
 
-                        <tr>
-
-                            <th>
-                                LMS
-                            </th>
-
-                            <th>
-                                Colaborador
-                            </th>
-
-                            <th>
-                                Equipamento
-                            </th>
-
-                            <th>
-                                Retirada
-                            </th>
-
-                            <th>
-                                Devolução
-                            </th>
-
-                            <th>
-                                Status
-                            </th>
-
-                            <th>
-                                Observação
-                            </th>
-
-                            <th>
-                                Ações
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody id="tabelaHistorico"></tbody>
-
-                </table>
+                <input
+                    type="text"
+                    id="nome"
+                    placeholder="O nome será preenchido automaticamente"
+                    readonly
+                >
 
             </div>
 
 
-            <!-- A paginação deve ficar somente aqui -->
+            <!-- EQUIPAMENTO -->
 
-            <div
-                id="paginacaoHistorico"
-                class="paginacao-historico"
-            ></div>
+            <div class="campo">
+
+                <label for="codigo">
+                    Código do equipamento
+                </label>
+
+                <input
+                    type="text"
+                    id="codigo"
+                    placeholder="Ex.: EQP001234"
+                >
+
+            </div>
+
+
+            <!-- OBSERVAÇÃO -->
+
+            <div class="campo">
+
+                <label for="observacao">
+                    Observação
+                </label>
+
+                <textarea
+                    id="observacao"
+                    rows="3"
+                    placeholder="Digite uma observação, se necessário..."
+                ></textarea>
+
+            </div>
 
         </div>
 
-    </section>
+
+        <div class="acoes">
+
+            <button
+                class="btn-principal"
+                onclick="registrarRetirada()"
+            >
+                Registrar retirada
+            </button>
+
+
+            <button
+                class="btn-secundario"
+                onclick="buscarRetirada()"
+            >
+                Buscar
+            </button>
+
+        </div>
+
+
+        <div id="resultadoRetirada"></div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================
+     HISTÓRICO
+========================= -->
+
+<section id="historico" class="pagina">
+
+    <div class="pagina-header">
+
+        <div>
+
+            <h2>
+                Histórico
+            </h2>
+
+            <p>
+                Consulte e gerencie os registros.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="painel">
+
+
+        <div class="busca">
+
+            <input
+                type="text"
+                id="buscaHistorico"
+                placeholder="Buscar por LMS, nome ou código"
+            >
+
+
+            <button onclick="carregarHistorico()">
+                Buscar
+            </button>
+
+
+            <button
+                class="btn-secundario"
+                onclick="mostrarTodos()"
+            >
+                Mostrar todos
+            </button>
+
+        </div>
+
+
+        <div class="tabela-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>LMS</th>
+
+                        <th>Colaborador</th>
+
+                        <th>Equipamento</th>
+
+                        <th>Retirada</th>
+
+                        <th>Devolução</th>
+
+                        <th>Status</th>
+
+                        <th>Observação</th>
+
+                        <th>Ações</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="tabelaHistorico"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
 
 </main>
+
 
 
 <!-- =========================
@@ -588,7 +570,7 @@
 
         <div class="campo">
 
-            <label for="editarColaboradorLms">
+            <label>
                 LMS
             </label>
 
@@ -602,7 +584,7 @@
 
         <div class="campo">
 
-            <label for="editarColaboradorNome">
+            <label>
                 Nome do colaborador
             </label>
 
@@ -638,6 +620,7 @@
 </div>
 
 
+
 <!-- =========================
      MODAL - EDITAR REGISTRO
 ========================= -->
@@ -668,7 +651,7 @@
 
         <div class="campo">
 
-            <label for="editarLms">
+            <label>
                 LMS
             </label>
 
@@ -682,7 +665,7 @@
 
         <div class="campo">
 
-            <label for="editarNome">
+            <label>
                 Nome do colaborador
             </label>
 
@@ -696,7 +679,7 @@
 
         <div class="campo">
 
-            <label for="editarCodigo">
+            <label>
                 Código do equipamento
             </label>
 
@@ -710,7 +693,7 @@
 
         <div class="campo">
 
-            <label for="editarStatus">
+            <label>
                 Status
             </label>
 
@@ -735,7 +718,7 @@
 
         <div class="campo">
 
-            <label for="editarObservacao">
+            <label>
                 Observação
             </label>
 
@@ -776,5 +759,4 @@
 <script src="script.js"></script>
 
 </body>
-
 </html>
