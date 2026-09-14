@@ -2,12 +2,8 @@
    SUPABASE
 ========================================================= */
 
-const SUPABASE_URL =
-    "https://apbmzwmqyiyrximydseq.supabase.co";
-
-const SUPABASE_ANON_KEY =
-    "sb_publishable_Qlgo3bzEfOZJBLLjyTxMkg_0p6v-Z8n";
-
+const SUPABASE_URL = "https://apbmzwmqyiyrximydseq.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Qlgo3bzEfOZJBLLjyTxMkg_0p6v-Z8n";
 
 const db = window.supabase.createClient(
     SUPABASE_URL,
@@ -20,169 +16,7 @@ const db = window.supabase.createClient(
 ========================================================= */
 
 let registros = [];
-
 let colaboradores = [];
-
-
-/* =========================================================
-   PAGINAÇÃO DO HISTÓRICO
-========================================================= */
-
-let paginaHistorico = 1;
-
-const REGISTROS_POR_PAGINA = 40;
-
-let listaHistorico = [];
-
-
-/* =========================================================
-   FUNÇÕES AUXILIARES
-========================================================= */
-
-function normalizarTexto(valor) {
-
-    return String(valor ?? "")
-        .trim()
-        .toLowerCase();
-
-}
-
-
-function escaparHTML(texto) {
-
-    if (
-        texto === undefined ||
-        texto === null
-    ) {
-        return "";
-    }
-
-
-    return String(texto)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
-}
-
-
-function formatarStatus(status) {
-
-    const nomes = {
-
-        retirado: "Retirado",
-
-        devolvido: "Devolvido",
-
-        extraviado: "Extraviado"
-
-    };
-
-
-    return nomes[status] || status || "-";
-
-}
-
-
-function formatarData(data) {
-
-    if (!data) {
-        return "-";
-    }
-
-
-    const dataFormatada = new Date(data);
-
-
-    if (Number.isNaN(dataFormatada.getTime())) {
-        return "-";
-    }
-
-
-    return dataFormatada.toLocaleString(
-        "pt-BR",
-        {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit"
-        }
-    );
-
-}
-
-
-/* =========================================================
-   GARANTIR PAGINAÇÃO NA SEÇÃO HISTÓRICO
-========================================================= */
-
-function obterPaginacaoHistorico() {
-
-    const historico = document
-        .getElementById("historico");
-
-
-    if (!historico) {
-        return null;
-    }
-
-
-    let paginacao = historico
-        .querySelector("#paginacaoHistorico");
-
-
-    /*
-       Se o elemento não existir dentro da seção Histórico,
-       ele será criado automaticamente depois da tabela.
-    */
-
-    if (!paginacao) {
-
-        paginacao = document
-            .createElement("div");
-
-
-        paginacao.id =
-            "paginacaoHistorico";
-
-
-        paginacao.className =
-            "paginacao-historico";
-
-
-        const tabelaContainer = historico
-            .querySelector(".tabela-container");
-
-
-        if (tabelaContainer) {
-
-            tabelaContainer
-                .insertAdjacentElement(
-                    "afterend",
-                    paginacao
-                );
-
-        } else {
-
-            const painel = historico
-                .querySelector(".painel");
-
-
-            if (painel) {
-                painel.appendChild(paginacao);
-            }
-
-        }
-
-    }
-
-
-    return paginacao;
-
-}
 
 
 /* =========================================================
@@ -191,16 +25,11 @@ function obterPaginacaoHistorico() {
 
 async function carregarDados() {
 
-    const {
-        data: dadosRegistros,
-        error: erroRegistros
-    } = await db
-        .from("registros")
-        .select("*")
-        .order("id", {
-            ascending: true
-        });
-
+    const { data: dadosRegistros, error: erroRegistros } =
+        await db
+            .from("registros")
+            .select("*")
+            .order("id", { ascending: true });
 
     if (erroRegistros) {
 
@@ -209,27 +38,19 @@ async function carregarDados() {
             erroRegistros
         );
 
-
         alert(
             "Não foi possível carregar os registros do banco de dados."
         );
 
-
         return;
-
     }
 
 
-    const {
-        data: dadosColaboradores,
-        error: erroColaboradores
-    } = await db
-        .from("colaboradores")
-        .select("*")
-        .order("id", {
-            ascending: true
-        });
-
+    const { data: dadosColaboradores, error: erroColaboradores } =
+        await db
+            .from("colaboradores")
+            .select("*")
+            .order("id", { ascending: true });
 
     if (erroColaboradores) {
 
@@ -238,28 +59,22 @@ async function carregarDados() {
             erroColaboradores
         );
 
-
         alert(
             "Não foi possível carregar os colaboradores do banco de dados."
         );
 
-
         return;
-
     }
 
 
-    registros =
-        dadosRegistros || [];
+    registros = dadosRegistros || [];
 
-
-    colaboradores =
-        dadosColaboradores || [];
+    colaboradores = dadosColaboradores || [];
 
 
     atualizarDashboard();
 
-    await carregarHistorico();
+    carregarHistorico();
 
 }
 
@@ -270,34 +85,23 @@ async function carregarDados() {
 
 function mostrarPagina(pagina, botao) {
 
+    document.querySelectorAll(".pagina").forEach(section => {
+
+        section.classList.remove("active");
+
+    });
+
+
+    document.querySelectorAll(".menu-btn").forEach(button => {
+
+        button.classList.remove("active");
+
+    });
+
+
     document
-        .querySelectorAll(".pagina")
-        .forEach(section => {
-
-            section.classList.remove("active");
-
-        });
-
-
-    document
-        .querySelectorAll(".menu-btn")
-        .forEach(button => {
-
-            button.classList.remove("active");
-
-        });
-
-
-    const paginaSelecionada = document
-        .getElementById(pagina);
-
-
-    if (paginaSelecionada) {
-
-        paginaSelecionada
-            .classList.add("active");
-
-    }
+        .getElementById(pagina)
+        .classList.add("active");
 
 
     if (botao) {
@@ -336,25 +140,16 @@ function mostrarPagina(pagina, botao) {
 
 async function cadastrarColaborador() {
 
-    const campoLms = document
-        .getElementById("cadastroLms");
+    const lms = document
+        .getElementById("cadastroLms")
+        .value
+        .trim();
 
 
-    const campoNome = document
-        .getElementById("cadastroNome");
-
-
-    if (!campoLms || !campoNome) {
-        return;
-    }
-
-
-    const lms =
-        campoLms.value.trim();
-
-
-    const nome =
-        campoNome.value.trim();
+    const nome = document
+        .getElementById("cadastroNome")
+        .value
+        .trim();
 
 
     if (!lms || !nome) {
@@ -363,22 +158,18 @@ async function cadastrarColaborador() {
             "Preencha o LMS e o nome do colaborador."
         );
 
-
         return;
-
     }
 
 
-    const lmsNormalizado =
-        normalizarTexto(lms);
+    const lmsNormalizado = lms.toLowerCase();
 
 
-    const existente =
-        colaboradores.find(
-            colaborador =>
-                normalizarTexto(colaborador.lms) ===
-                lmsNormalizado
-        );
+    const existente = colaboradores.find(
+        colaborador =>
+            colaborador.lms.toLowerCase() ===
+            lmsNormalizado
+    );
 
 
     if (existente) {
@@ -387,16 +178,11 @@ async function cadastrarColaborador() {
             "Este LMS já está cadastrado."
         );
 
-
         return;
-
     }
 
 
-    const {
-        data,
-        error
-    } = await db
+    const { data, error } = await db
         .from("colaboradores")
         .insert([
             {
@@ -415,26 +201,28 @@ async function cadastrarColaborador() {
             error
         );
 
-
         alert(
             "Erro ao cadastrar colaborador."
         );
 
-
         return;
-
     }
 
 
     colaboradores.push(data);
 
 
-    campoLms.value = "";
+    document.getElementById(
+        "cadastroLms"
+    ).value = "";
 
-    campoNome.value = "";
+
+    document.getElementById(
+        "cadastroNome"
+    ).value = "";
 
 
-    await carregarColaboradores();
+    carregarColaboradores();
 
 }
 
@@ -449,28 +237,19 @@ async function carregarColaboradores() {
         .getElementById("buscaColaborador");
 
 
-    const tabela = document
-        .getElementById("tabelaColaboradores");
+    if (!campo) return;
 
 
-    if (!campo || !tabela) {
-        return;
-    }
+    const termo = campo
+        .value
+        .trim()
+        .toLowerCase();
 
 
-    const termo =
-        normalizarTexto(campo.value);
-
-
-    const {
-        data,
-        error
-    } = await db
+    const { data, error } = await db
         .from("colaboradores")
         .select("*")
-        .order("id", {
-            ascending: true
-        });
+        .order("id", { ascending: true });
 
 
     if (error) {
@@ -480,38 +259,39 @@ async function carregarColaboradores() {
             error
         );
 
-
         return;
-
     }
 
 
-    colaboradores =
-        data || [];
+    colaboradores = data || [];
 
 
-    let lista =
-        colaboradores;
+    let lista = colaboradores;
 
 
     if (termo) {
 
-        lista =
-            colaboradores.filter(
-                colaborador =>
+        lista = colaboradores.filter(
+            colaborador =>
 
-                    normalizarTexto(
-                        colaborador.lms
-                    ).includes(termo)
+                colaborador.lms
+                    .toLowerCase()
+                    .includes(termo)
 
-                    ||
+                ||
 
-                    normalizarTexto(
-                        colaborador.nome
-                    ).includes(termo)
-            );
+                colaborador.nome
+                    .toLowerCase()
+                    .includes(termo)
+        );
 
     }
+
+
+    const tabela = document
+        .getElementById(
+            "tabelaColaboradores"
+        );
 
 
     if (!lista.length) {
@@ -528,51 +308,48 @@ async function carregarColaboradores() {
 
         `;
 
-
         return;
-
     }
 
 
-    tabela.innerHTML =
-        lista
-            .slice()
-            .reverse()
-            .map(colaborador => `
+    tabela.innerHTML = lista
+        .slice()
+        .reverse()
+        .map(colaborador => `
 
-                <tr>
+            <tr>
 
-                    <td>
-                        ${escaparHTML(colaborador.lms)}
-                    </td>
+                <td>
+                    ${escaparHTML(colaborador.lms)}
+                </td>
 
-                    <td>
-                        ${escaparHTML(colaborador.nome)}
-                    </td>
+                <td>
+                    ${escaparHTML(colaborador.nome)}
+                </td>
 
-                    <td>
+                <td>
 
-                        <button
-                            class="btn-editar"
-                            onclick="abrirEdicaoColaborador(${colaborador.id})"
-                        >
-                            Editar
-                        </button>
+                    <button
+                        class="btn-editar"
+                        onclick="abrirEdicaoColaborador(${colaborador.id})"
+                    >
+                        Editar
+                    </button>
 
 
-                        <button
-                            class="btn-excluir"
-                            onclick="excluirColaborador(${colaborador.id})"
-                        >
-                            Excluir
-                        </button>
+                    <button
+                        class="btn-excluir"
+                        onclick="excluirColaborador(${colaborador.id})"
+                    >
+                        Excluir
+                    </button>
 
-                    </td>
+                </td>
 
-                </tr>
+            </tr>
 
-            `)
-            .join("");
+        `)
+        .join("");
 
 }
 
@@ -583,16 +360,9 @@ async function carregarColaboradores() {
 
 function mostrarTodosColaboradores() {
 
-    const campo = document
-        .getElementById("buscaColaborador");
-
-
-    if (!campo) {
-        return;
-    }
-
-
-    campo.value = "";
+    document.getElementById(
+        "buscaColaborador"
+    ).value = "";
 
 
     carregarColaboradores();
@@ -618,13 +388,10 @@ function buscarNomePorLms() {
         .getElementById("statusLms");
 
 
-    if (!campoLms || !campoNome || !status) {
-        return;
-    }
-
-
-    const lms =
-        normalizarTexto(campoLms.value);
+    const lms = campoLms
+        .value
+        .trim()
+        .toLowerCase();
 
 
     campoNome.value = "";
@@ -635,15 +402,15 @@ function buscarNomePorLms() {
 
 
     if (!lms) {
+
         return;
     }
 
 
-    const colaborador =
-        colaboradores.find(
-            item =>
-                normalizarTexto(item.lms) === lms
-        );
+    const colaborador = colaboradores.find(
+        item =>
+            item.lms.toLowerCase() === lms
+    );
 
 
     if (colaborador) {
@@ -656,7 +423,9 @@ function buscarNomePorLms() {
             "Colaborador encontrado";
 
 
-        status.classList.add("sucesso");
+        status.classList.add(
+            "sucesso"
+        );
 
     } else {
 
@@ -664,7 +433,9 @@ function buscarNomePorLms() {
             "LMS não cadastrado";
 
 
-        status.classList.add("erro");
+        status.classList.add(
+            "erro"
+        );
 
     }
 
@@ -677,46 +448,28 @@ function buscarNomePorLms() {
 
 async function registrarRetirada() {
 
-    const campoLms = document
-        .getElementById("lms");
+    const lms = document
+        .getElementById("lms")
+        .value
+        .trim();
 
 
-    const campoNome = document
-        .getElementById("nome");
+    const nome = document
+        .getElementById("nome")
+        .value
+        .trim();
 
 
-    const campoCodigo = document
-        .getElementById("codigo");
+    const codigo = document
+        .getElementById("codigo")
+        .value
+        .trim();
 
 
-    const campoObservacao = document
-        .getElementById("observacao");
-
-
-    if (
-        !campoLms ||
-        !campoNome ||
-        !campoCodigo ||
-        !campoObservacao
-    ) {
-        return;
-    }
-
-
-    const lms =
-        campoLms.value.trim();
-
-
-    const nome =
-        campoNome.value.trim();
-
-
-    const codigo =
-        campoCodigo.value.trim();
-
-
-    const observacao =
-        campoObservacao.value.trim();
+    const observacao = document
+        .getElementById("observacao")
+        .value
+        .trim();
 
 
     if (!lms || !codigo) {
@@ -725,9 +478,7 @@ async function registrarRetirada() {
             "Preencha o LMS e o código do equipamento."
         );
 
-
         return;
-
     }
 
 
@@ -737,21 +488,17 @@ async function registrarRetirada() {
             "O LMS informado não está cadastrado. Cadastre o colaborador primeiro."
         );
 
-
         return;
-
     }
 
 
-    const {
-        data: equipamentoExistente,
-        error: erroBusca
-    } = await db
-        .from("registros")
-        .select("*")
-        .ilike("codigo", codigo)
-        .eq("status", "retirado")
-        .limit(1);
+    const { data: equipamentoExistente, error: erroBusca } =
+        await db
+            .from("registros")
+            .select("*")
+            .ilike("codigo", codigo)
+            .eq("status", "retirado")
+            .limit(1);
 
 
     if (erroBusca) {
@@ -761,14 +508,11 @@ async function registrarRetirada() {
             erroBusca
         );
 
-
         alert(
             "Erro ao verificar o equipamento."
         );
 
-
         return;
-
     }
 
 
@@ -781,16 +525,11 @@ async function registrarRetirada() {
             "Este equipamento já está registrado como retirado."
         );
 
-
         return;
-
     }
 
 
-    const {
-        data,
-        error
-    } = await db
+    const { data, error } = await db
         .from("registros")
         .insert([
             {
@@ -814,46 +553,34 @@ async function registrarRetirada() {
             error
         );
 
-
         alert(
             "Erro ao registrar a retirada."
         );
 
-
         return;
-
     }
 
 
     registros.push(data);
 
 
-    campoLms.value = "";
+    document.getElementById("lms").value = "";
 
-    campoNome.value = "";
+    document.getElementById("nome").value = "";
 
-    campoCodigo.value = "";
+    document.getElementById("codigo").value = "";
 
-    campoObservacao.value = "";
+    document.getElementById("observacao").value = "";
 
+    document.getElementById("statusLms").textContent = "";
 
-    const statusLms = document
-        .getElementById("statusLms");
-
-
-    if (statusLms) {
-
-        statusLms.textContent = "";
-
-        statusLms.className =
-            "status-lms";
-
-    }
+    document.getElementById("statusLms").className =
+        "status-lms";
 
 
     atualizarDashboard();
 
-    await carregarHistorico();
+    carregarHistorico();
 
 }
 
@@ -864,80 +591,55 @@ async function registrarRetirada() {
 
 function atualizarDashboard() {
 
-    const retirados =
-        registros.filter(
-            item =>
-                item.status === "retirado"
-        ).length;
+    const retirados = registros.filter(
+        item => item.status === "retirado"
+    ).length;
 
 
-    const devolvidos =
-        registros.filter(
-            item =>
-                item.status === "devolvido"
-        ).length;
+    const devolvidos = registros.filter(
+        item => item.status === "devolvido"
+    ).length;
 
 
-    const extraviados =
-        registros.filter(
-            item =>
-                item.status === "extraviado"
-        ).length;
+    const extraviados = registros.filter(
+        item => item.status === "extraviado"
+    ).length;
 
 
-    const totalRetirados = document
-        .getElementById("totalRetirados");
+    document.getElementById(
+        "totalRetirados"
+    ).textContent = retirados;
 
 
-    const totalDevolvidos = document
-        .getElementById("totalDevolvidos");
+    document.getElementById(
+        "totalDevolvidos"
+    ).textContent = devolvidos;
 
 
-    const totalExtraviados = document
-        .getElementById("totalExtraviados");
-
-
-    if (totalRetirados) {
-        totalRetirados.textContent =
-            retirados;
-    }
-
-
-    if (totalDevolvidos) {
-        totalDevolvidos.textContent =
-            devolvidos;
-    }
-
-
-    if (totalExtraviados) {
-        totalExtraviados.textContent =
-            extraviados;
-    }
+    document.getElementById(
+        "totalExtraviados"
+    ).textContent = extraviados;
 
 }
 
 
 /* =========================================================
-   BUSCA NO DASHBOARD
+   BUSCA DASHBOARD
 ========================================================= */
 
 function buscarDashboard() {
 
-    const campo = document
-        .getElementById("buscaDashboard");
+    const termo = document
+        .getElementById("buscaDashboard")
+        .value
+        .trim()
+        .toLowerCase();
 
 
     const resultado = document
-        .getElementById("resultadoDashboard");
-
-
-    if (!campo || !resultado) {
-        return;
-    }
-
-
-    const termo =
-        normalizarTexto(campo.value);
+        .getElementById(
+            "resultadoDashboard"
+        );
 
 
     if (!termo) {
@@ -945,27 +647,28 @@ function buscarDashboard() {
         resultado.innerHTML = "";
 
         return;
-
     }
 
 
-    const encontrados =
-        registros.filter(
-            item =>
+    const encontrados = registros.filter(
+        item =>
 
-                normalizarTexto(item.lms)
-                    .includes(termo)
+            item.lms
+                .toLowerCase()
+                .includes(termo)
 
-                ||
+            ||
 
-                normalizarTexto(item.nome)
-                    .includes(termo)
+            item.nome
+                .toLowerCase()
+                .includes(termo)
 
-                ||
+            ||
 
-                normalizarTexto(item.codigo)
-                    .includes(termo)
-        );
+            item.codigo
+                .toLowerCase()
+                .includes(termo)
+    );
 
 
     if (!encontrados.length) {
@@ -978,16 +681,12 @@ function buscarDashboard() {
 
         `;
 
-
         return;
-
     }
 
 
     resultado.innerHTML =
         encontrados
-            .slice()
-            .reverse()
             .map(item => `
 
                 <div class="resultado">
@@ -1011,11 +710,9 @@ function buscarDashboard() {
                         Status:
 
                         <span
-                            class="status ${escaparHTML(item.status)}"
+                            class="status ${item.status}"
                         >
-                            ${escaparHTML(
-                                formatarStatus(item.status)
-                            )}
+                            ${formatarStatus(item.status)}
                         </span>
 
                     </div>
@@ -1029,20 +726,22 @@ function buscarDashboard() {
                         Devolução:
                         ${
                             item.devolucao
-                                ? formatarData(item.devolucao)
-                                : "-"
+                            ? formatarData(item.devolucao)
+                            : "-"
                         }
                     </div>
 
                     ${
                         item.observacao
-                            ? `
-                                <div>
-                                    Observação:
-                                    ${escaparHTML(item.observacao)}
-                                </div>
-                            `
-                            : ""
+                        ?
+                        `
+                            <div>
+                                Observação:
+                                ${escaparHTML(item.observacao)}
+                            </div>
+                        `
+                        :
+                        ""
                     }
 
                 </div>
@@ -1054,47 +753,36 @@ function buscarDashboard() {
 
 
 /* =========================================================
-   BUSCA NA ABA DE RETIRADA
+   BUSCA NA RETIRADA
 ========================================================= */
 
 function buscarRetirada() {
 
-    const campoLms = document
-        .getElementById("lms");
+    const lms = document
+        .getElementById("lms")
+        .value
+        .trim()
+        .toLowerCase();
 
 
-    const campoCodigo = document
-        .getElementById("codigo");
+    const codigo = document
+        .getElementById("codigo")
+        .value
+        .trim()
+        .toLowerCase();
 
 
-    const campoNome = document
-        .getElementById("nome");
+    const nome = document
+        .getElementById("nome")
+        .value
+        .trim()
+        .toLowerCase();
 
 
     const resultado = document
-        .getElementById("resultadoRetirada");
-
-
-    if (
-        !campoLms ||
-        !campoCodigo ||
-        !campoNome ||
-        !resultado
-    ) {
-        return;
-    }
-
-
-    const lms =
-        normalizarTexto(campoLms.value);
-
-
-    const codigo =
-        normalizarTexto(campoCodigo.value);
-
-
-    const nome =
-        normalizarTexto(campoNome.value);
+        .getElementById(
+            "resultadoRetirada"
+        );
 
 
     if (!lms && !codigo && !nome) {
@@ -1102,36 +790,31 @@ function buscarRetirada() {
         resultado.innerHTML = "";
 
         return;
-
     }
 
 
-    const encontrados =
-        registros.filter(
-            item =>
+    const encontrados = registros.filter(
+        item =>
 
-                (
-                    lms &&
-                    normalizarTexto(item.lms)
-                        .includes(lms)
-                )
+            (lms &&
+                item.lms
+                    .toLowerCase()
+                    .includes(lms))
 
-                ||
+            ||
 
-                (
-                    codigo &&
-                    normalizarTexto(item.codigo)
-                        .includes(codigo)
-                )
+            (codigo &&
+                item.codigo
+                    .toLowerCase()
+                    .includes(codigo))
 
-                ||
+            ||
 
-                (
-                    nome &&
-                    normalizarTexto(item.nome)
-                        .includes(nome)
-                )
-        );
+            (nome &&
+                item.nome
+                    .toLowerCase()
+                    .includes(nome))
+    );
 
 
     if (!encontrados.length) {
@@ -1144,16 +827,12 @@ function buscarRetirada() {
 
         `;
 
-
         return;
-
     }
 
 
     resultado.innerHTML =
         encontrados
-            .slice()
-            .reverse()
             .map(item => `
 
                 <div class="resultado">
@@ -1177,41 +856,30 @@ function buscarRetirada() {
                         Status:
 
                         <span
-                            class="status ${escaparHTML(item.status)}"
+                            class="status ${item.status}"
                         >
-                            ${escaparHTML(
-                                formatarStatus(item.status)
-                            )}
+                            ${formatarStatus(item.status)}
                         </span>
 
                     </div>
 
-                    <div>
-                        Retirada:
-                        ${formatarData(item.retirada)}
-                    </div>
-
-                    <div>
-                        Devolução:
-                        ${
-                            item.devolucao
-                                ? formatarData(item.devolucao)
-                                : "-"
-                        }
-                    </div>
 
                     ${
                         item.observacao
-                            ? `
-                                <div>
-                                    Observação:
-                                    ${escaparHTML(item.observacao)}
-                                </div>
-                            `
-                            : ""
+                        ?
+                        `
+                            <div>
+                                Observação:
+                                ${escaparHTML(item.observacao)}
+                            </div>
+                        `
+                        :
+                        ""
                     }
 
+
                     <br>
+
 
                     <button
                         class="btn-editar"
@@ -1238,28 +906,19 @@ async function carregarHistorico() {
         .getElementById("buscaHistorico");
 
 
-    const tabela = document
-        .querySelector("#historico #tabelaHistorico");
+    if (!campo) return;
 
 
-    if (!campo || !tabela) {
-        return;
-    }
+    const termo = campo
+        .value
+        .trim()
+        .toLowerCase();
 
 
-    const termo =
-        normalizarTexto(campo.value);
-
-
-    const {
-        data,
-        error
-    } = await db
+    const { data, error } = await db
         .from("registros")
         .select("*")
-        .order("id", {
-            ascending: true
-        });
+        .order("id", { ascending: true });
 
 
     if (error) {
@@ -1269,113 +928,48 @@ async function carregarHistorico() {
             error
         );
 
-
-        tabela.innerHTML = `
-
-            <tr>
-
-                <td colspan="8">
-                    Erro ao carregar o histórico.
-                </td>
-
-            </tr>
-
-        `;
-
-
-        const paginacaoErro =
-            obterPaginacaoHistorico();
-
-
-        if (paginacaoErro) {
-            paginacaoErro.innerHTML = "";
-        }
-
-
         return;
-
     }
 
 
-    registros =
-        data || [];
+    registros = data || [];
 
 
-    let lista =
-        registros;
+    let lista = registros;
 
 
     if (termo) {
 
-        lista =
-            registros.filter(
-                item =>
+        lista = registros.filter(
+            item =>
 
-                    normalizarTexto(item.lms)
-                        .includes(termo)
+                item.lms
+                    .toLowerCase()
+                    .includes(termo)
 
-                    ||
+                ||
 
-                    normalizarTexto(item.nome)
-                        .includes(termo)
+                item.nome
+                    .toLowerCase()
+                    .includes(termo)
 
-                    ||
+                ||
 
-                    normalizarTexto(item.codigo)
-                        .includes(termo)
-            );
+                item.codigo
+                    .toLowerCase()
+                    .includes(termo)
+        );
 
     }
 
 
-    /*
-       Os registros mais recentes aparecem primeiro.
-    */
-
-    listaHistorico =
-        lista
-            .slice()
-            .reverse();
+    const tabela = document
+        .getElementById(
+            "tabelaHistorico"
+        );
 
 
-    /*
-       Toda nova busca ou recarregamento
-       começa na primeira página.
-    */
-
-    paginaHistorico = 1;
-
-
-    renderizarHistorico();
-
-}
-
-
-/* =========================================================
-   RENDERIZAR HISTÓRICO PAGINADO
-========================================================= */
-
-function renderizarHistorico() {
-
-    const historico = document
-        .getElementById("historico");
-
-
-    const tabela = historico
-        ? historico.querySelector("#tabelaHistorico")
-        : null;
-
-
-    const paginacao =
-        obterPaginacaoHistorico();
-
-
-    if (!tabela || !paginacao) {
-        return;
-    }
-
-
-    if (!listaHistorico.length) {
+    if (!lista.length) {
 
         tabela.innerHTML = `
 
@@ -1389,52 +983,14 @@ function renderizarHistorico() {
 
         `;
 
-
-        paginacao.innerHTML = "";
-
         return;
-
     }
-
-
-    const totalPaginas =
-        Math.ceil(
-            listaHistorico.length /
-            REGISTROS_POR_PAGINA
-        );
-
-
-    if (paginaHistorico < 1) {
-
-        paginaHistorico = 1;
-
-    }
-
-
-    if (paginaHistorico > totalPaginas) {
-
-        paginaHistorico =
-            totalPaginas;
-
-    }
-
-
-    const inicio =
-        (
-            paginaHistorico - 1
-        ) * REGISTROS_POR_PAGINA;
-
-
-    const fim =
-        inicio + REGISTROS_POR_PAGINA;
-
-
-    const registrosDaPagina =
-        listaHistorico.slice(inicio, fim);
 
 
     tabela.innerHTML =
-        registrosDaPagina
+        lista
+            .slice()
+            .reverse()
             .map(item => `
 
                 <tr>
@@ -1443,45 +999,52 @@ function renderizarHistorico() {
                         ${escaparHTML(item.lms)}
                     </td>
 
+
                     <td>
                         ${escaparHTML(item.nome)}
                     </td>
+
 
                     <td>
                         ${escaparHTML(item.codigo)}
                     </td>
 
+
                     <td>
                         ${formatarData(item.retirada)}
                     </td>
 
+
                     <td>
                         ${
                             item.devolucao
-                                ? formatarData(item.devolucao)
-                                : "-"
+                            ? formatarData(item.devolucao)
+                            : "-"
                         }
                     </td>
+
 
                     <td>
 
                         <span
-                            class="status ${escaparHTML(item.status)}"
+                            class="status ${item.status}"
                         >
-                            ${escaparHTML(
-                                formatarStatus(item.status)
-                            )}
+                            ${formatarStatus(item.status)}
                         </span>
 
                     </td>
 
+
                     <td class="observacao-tabela">
+
                         ${
                             item.observacao
-                                ? escaparHTML(item.observacao)
-                                : "-"
+                            ? escaparHTML(item.observacao)
+                            : "-"
                         }
+
                     </td>
+
 
                     <td>
 
@@ -1491,6 +1054,7 @@ function renderizarHistorico() {
                         >
                             Editar
                         </button>
+
 
                         <button
                             class="btn-excluir"
@@ -1506,134 +1070,18 @@ function renderizarHistorico() {
             `)
             .join("");
 
-
-    paginacao.innerHTML = `
-
-        <div class="paginacao-info">
-
-            Exibindo
-            ${inicio + 1}
-            até
-            ${Math.min(
-                fim,
-                listaHistorico.length
-            )}
-            de
-            ${listaHistorico.length}
-            registros
-
-        </div>
-
-
-        <div class="paginacao-controles">
-
-            <button
-                type="button"
-                class="btn-paginacao"
-                onclick="mudarPaginaHistorico(-1)"
-                ${paginaHistorico === 1 ? "disabled" : ""}
-            >
-                Anterior
-            </button>
-
-
-            <span class="pagina-atual">
-                Página ${paginaHistorico} de ${totalPaginas}
-            </span>
-
-
-            <button
-                type="button"
-                class="btn-paginacao"
-                onclick="mudarPaginaHistorico(1)"
-                ${
-                    paginaHistorico === totalPaginas
-                        ? "disabled"
-                        : ""
-                }
-            >
-                Próxima
-            </button>
-
-        </div>
-
-    `;
-
 }
 
 
 /* =========================================================
-   MUDAR PÁGINA DO HISTÓRICO
-========================================================= */
-
-function mudarPaginaHistorico(direcao) {
-
-    const totalPaginas =
-        Math.ceil(
-            listaHistorico.length /
-            REGISTROS_POR_PAGINA
-        );
-
-
-    if (!totalPaginas) {
-        return;
-    }
-
-
-    const novaPagina =
-        paginaHistorico + Number(direcao);
-
-
-    if (
-        novaPagina < 1 ||
-        novaPagina > totalPaginas
-    ) {
-        return;
-    }
-
-
-    paginaHistorico =
-        novaPagina;
-
-
-    renderizarHistorico();
-
-
-    const historico =
-        document.getElementById("historico");
-
-
-    if (historico) {
-
-        historico.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-        });
-
-    }
-
-}
-
-
-/* =========================================================
-   MOSTRAR TODOS OS REGISTROS
+   MOSTRAR TODOS
 ========================================================= */
 
 function mostrarTodos() {
 
-    const campo = document
-        .getElementById("buscaHistorico");
-
-
-    if (!campo) {
-        return;
-    }
-
-
-    campo.value = "";
-
-
-    paginaHistorico = 1;
+    document.getElementById(
+        "buscaHistorico"
+    ).value = "";
 
 
     carregarHistorico();
@@ -1647,148 +1095,89 @@ function mostrarTodos() {
 
 function abrirEdicao(id) {
 
-    const registro =
-        registros.find(
-            item =>
-                Number(item.id) === Number(id)
-        );
+    const registro = registros.find(
+        item => Number(item.id) === Number(id)
+    );
 
 
-    if (!registro) {
-        return;
-    }
+    if (!registro) return;
 
 
-    const campoId = document
-        .getElementById("editarId");
+    document.getElementById(
+        "editarId"
+    ).value = registro.id;
 
 
-    const campoLms = document
-        .getElementById("editarLms");
+    document.getElementById(
+        "editarLms"
+    ).value = registro.lms;
 
 
-    const campoNome = document
-        .getElementById("editarNome");
+    document.getElementById(
+        "editarNome"
+    ).value = registro.nome;
 
 
-    const campoCodigo = document
-        .getElementById("editarCodigo");
+    document.getElementById(
+        "editarCodigo"
+    ).value = registro.codigo;
 
 
-    const campoStatus = document
-        .getElementById("editarStatus");
+    document.getElementById(
+        "editarStatus"
+    ).value = registro.status;
 
 
-    const campoObservacao = document
-        .getElementById("editarObservacao");
-
-
-    const modal = document
-        .getElementById("modalEdicao");
-
-
-    if (
-        !campoId ||
-        !campoLms ||
-        !campoNome ||
-        !campoCodigo ||
-        !campoStatus ||
-        !campoObservacao ||
-        !modal
-    ) {
-        return;
-    }
-
-
-    campoId.value =
-        registro.id;
-
-
-    campoLms.value =
-        registro.lms || "";
-
-
-    campoNome.value =
-        registro.nome || "";
-
-
-    campoCodigo.value =
-        registro.codigo || "";
-
-
-    campoStatus.value =
-        registro.status || "retirado";
-
-
-    campoObservacao.value =
+    document.getElementById(
+        "editarObservacao"
+    ).value =
         registro.observacao || "";
 
 
-    modal.classList.add("aberto");
+    document
+        .getElementById("modalEdicao")
+        .classList.add("aberto");
 
 }
 
 
 async function salvarEdicao() {
 
-    const campoId = document
-        .getElementById("editarId");
+    const id = Number(
+        document.getElementById(
+            "editarId"
+        ).value
+    );
 
 
-    const campoLms = document
-        .getElementById("editarLms");
+    const lms = document
+        .getElementById("editarLms")
+        .value
+        .trim();
 
 
-    const campoNome = document
-        .getElementById("editarNome");
+    const nome = document
+        .getElementById("editarNome")
+        .value
+        .trim();
 
 
-    const campoCodigo = document
-        .getElementById("editarCodigo");
+    const codigo = document
+        .getElementById("editarCodigo")
+        .value
+        .trim();
 
 
-    const campoStatus = document
-        .getElementById("editarStatus");
-
-
-    const campoObservacao = document
-        .getElementById("editarObservacao");
-
-
-    if (
-        !campoId ||
-        !campoLms ||
-        !campoNome ||
-        !campoCodigo ||
-        !campoStatus ||
-        !campoObservacao
-    ) {
-        return;
-    }
-
-
-    const id =
-        Number(campoId.value);
-
-
-    const lms =
-        campoLms.value.trim();
-
-
-    const nome =
-        campoNome.value.trim();
-
-
-    const codigo =
-        campoCodigo.value.trim();
-
-
-    const observacao =
-        campoObservacao.value.trim();
+    const observacao = document
+        .getElementById("editarObservacao")
+        .value
+        .trim();
 
 
     const novoStatus =
-        campoStatus.value;
+        document.getElementById(
+            "editarStatus"
+        ).value;
 
 
     if (!lms || !nome || !codigo) {
@@ -1797,26 +1186,19 @@ async function salvarEdicao() {
             "Preencha o LMS, nome e código do equipamento."
         );
 
-
-        return;
-
-    }
-
-
-    const registro =
-        registros.find(
-            item =>
-                Number(item.id) === id
-        );
-
-
-    if (!registro) {
         return;
     }
 
 
-    let devolucao =
-        registro.devolucao;
+    const registro = registros.find(
+        item => Number(item.id) === id
+    );
+
+
+    if (!registro) return;
+
+
+    let devolucao = registro.devolucao;
 
 
     if (
@@ -1830,25 +1212,32 @@ async function salvarEdicao() {
     }
 
 
-    if (novoStatus !== "devolvido") {
+    if (
+        novoStatus !== "devolvido"
+    ) {
 
         devolucao = null;
 
     }
 
 
-    const {
-        data,
-        error
-    } = await db
+    const { data, error } = await db
         .from("registros")
         .update({
+
             lms: lms,
+
             nome: nome,
+
             codigo: codigo,
-            observacao: observacao || null,
+
+            observacao:
+                observacao || null,
+
             status: novoStatus,
+
             devolucao: devolucao
+
         })
         .eq("id", id)
         .select()
@@ -1862,28 +1251,22 @@ async function salvarEdicao() {
             error
         );
 
-
         alert(
             "Erro ao salvar as alterações."
         );
 
-
         return;
-
     }
 
 
-    const indice =
-        registros.findIndex(
-            item =>
-                Number(item.id) === id
-        );
+    const indice = registros.findIndex(
+        item => Number(item.id) === id
+    );
 
 
     if (indice !== -1) {
 
-        registros[indice] =
-            data;
+        registros[indice] = data;
 
     }
 
@@ -1892,7 +1275,7 @@ async function salvarEdicao() {
 
     atualizarDashboard();
 
-    await carregarHistorico();
+    carregarHistorico();
 
 }
 
@@ -1903,16 +1286,9 @@ async function salvarEdicao() {
 
 function fecharModal() {
 
-    const modal = document
-        .getElementById("modalEdicao");
-
-
-    if (modal) {
-
-        modal.classList
-            .remove("aberto");
-
-    }
+    document
+        .getElementById("modalEdicao")
+        .classList.remove("aberto");
 
 }
 
@@ -1923,20 +1299,15 @@ function fecharModal() {
 
 async function excluirRegistro(id) {
 
-    const confirmar =
-        confirm(
-            "Tem certeza que deseja excluir este registro?"
-        );
+    const confirmar = confirm(
+        "Tem certeza que deseja excluir este registro?"
+    );
 
 
-    if (!confirmar) {
-        return;
-    }
+    if (!confirmar) return;
 
 
-    const {
-        error
-    } = await db
+    const { error } = await db
         .from("registros")
         .delete()
         .eq("id", id);
@@ -1949,27 +1320,22 @@ async function excluirRegistro(id) {
             error
         );
 
-
         alert(
             "Erro ao excluir o registro."
         );
 
-
         return;
-
     }
 
 
-    registros =
-        registros.filter(
-            item =>
-                Number(item.id) !== Number(id)
-        );
+    registros = registros.filter(
+        item => Number(item.id) !== Number(id)
+    );
 
 
     atualizarDashboard();
 
-    await carregarHistorico();
+    carregarHistorico();
 
 }
 
@@ -1982,106 +1348,60 @@ function abrirEdicaoColaborador(id) {
 
     const colaborador =
         colaboradores.find(
-            item =>
-                Number(item.id) === Number(id)
+            item => Number(item.id) === Number(id)
         );
 
 
-    if (!colaborador) {
-        return;
-    }
+    if (!colaborador) return;
 
 
-    const campoId = document
-        .getElementById(
-            "editarColaboradorId"
-        );
+    document.getElementById(
+        "editarColaboradorId"
+    ).value = colaborador.id;
 
 
-    const campoLms = document
-        .getElementById(
-            "editarColaboradorLms"
-        );
+    document.getElementById(
+        "editarColaboradorLms"
+    ).value = colaborador.lms;
 
 
-    const campoNome = document
-        .getElementById(
-            "editarColaboradorNome"
-        );
+    document.getElementById(
+        "editarColaboradorNome"
+    ).value = colaborador.nome;
 
 
-    const modal = document
+    document
         .getElementById(
             "modalColaborador"
-        );
-
-
-    if (
-        !campoId ||
-        !campoLms ||
-        !campoNome ||
-        !modal
-    ) {
-        return;
-    }
-
-
-    campoId.value =
-        colaborador.id;
-
-
-    campoLms.value =
-        colaborador.lms || "";
-
-
-    campoNome.value =
-        colaborador.nome || "";
-
-
-    modal.classList.add("aberto");
+        )
+        .classList.add("aberto");
 
 }
 
 
 async function salvarEdicaoColaborador() {
 
-    const campoId = document
-        .getElementById(
+    const id = Number(
+        document.getElementById(
             "editarColaboradorId"
-        );
+        ).value
+    );
 
 
-    const campoLms = document
+    const lms = document
         .getElementById(
             "editarColaboradorLms"
-        );
+        )
+        .value
+        .trim();
 
 
-    const campoNome = document
+    const nome = document
         .getElementById(
             "editarColaboradorNome"
-        );
-
-
-    if (
-        !campoId ||
-        !campoLms ||
-        !campoNome
-    ) {
-        return;
-    }
-
-
-    const id =
-        Number(campoId.value);
-
-
-    const lms =
-        campoLms.value.trim();
-
-
-    const nome =
-        campoNome.value.trim();
+        )
+        .value
+        .trim();
 
 
     if (!lms || !nome) {
@@ -2090,20 +1410,16 @@ async function salvarEdicaoColaborador() {
             "Preencha o LMS e o nome."
         );
 
-
         return;
-
     }
 
 
     const outroColaborador =
         colaboradores.find(
             item =>
-
                 Number(item.id) !== id &&
-
-                normalizarTexto(item.lms) ===
-                normalizarTexto(lms)
+                item.lms.toLowerCase() ===
+                lms.toLowerCase()
         );
 
 
@@ -2113,37 +1429,34 @@ async function salvarEdicaoColaborador() {
             "Este LMS já pertence a outro colaborador."
         );
 
-
         return;
-
     }
 
 
     const colaborador =
         colaboradores.find(
-            item =>
-                Number(item.id) === id
+            item => Number(item.id) === id
         );
 
 
-    if (!colaborador) {
-        return;
-    }
+    if (!colaborador) return;
 
 
     const lmsAntigo =
         colaborador.lms;
 
 
-    const {
-        error: erroColaborador
-    } = await db
-        .from("colaboradores")
-        .update({
-            lms: lms,
-            nome: nome
-        })
-        .eq("id", id);
+    const { error: erroColaborador } =
+        await db
+            .from("colaboradores")
+            .update({
+
+                lms: lms,
+
+                nome: nome
+
+            })
+            .eq("id", id);
 
 
     if (erroColaborador) {
@@ -2153,14 +1466,11 @@ async function salvarEdicaoColaborador() {
             erroColaborador
         );
 
-
         alert(
             "Erro ao salvar o colaborador."
         );
 
-
         return;
-
     }
 
 
@@ -2169,15 +1479,17 @@ async function salvarEdicaoColaborador() {
        desse colaborador.
     */
 
-    const {
-        error: erroRegistros
-    } = await db
-        .from("registros")
-        .update({
-            lms: lms,
-            nome: nome
-        })
-        .ilike("lms", lmsAntigo);
+    const { error: erroRegistros } =
+        await db
+            .from("registros")
+            .update({
+
+                lms: lms,
+
+                nome: nome
+
+            })
+            .ilike("lms", lmsAntigo);
 
 
     if (erroRegistros) {
@@ -2186,7 +1498,6 @@ async function salvarEdicaoColaborador() {
             "Erro ao atualizar registros:",
             erroRegistros
         );
-
 
         alert(
             "O colaborador foi atualizado, mas ocorreu um erro ao atualizar os registros antigos."
@@ -2198,9 +1509,7 @@ async function salvarEdicaoColaborador() {
     colaboradores =
         colaboradores.map(item => {
 
-            if (
-                Number(item.id) === id
-            ) {
+            if (Number(item.id) === id) {
 
                 return {
                     ...item,
@@ -2209,7 +1518,6 @@ async function salvarEdicaoColaborador() {
                 };
 
             }
-
 
             return item;
 
@@ -2220,8 +1528,8 @@ async function salvarEdicaoColaborador() {
         registros.map(item => {
 
             if (
-                normalizarTexto(item.lms) ===
-                normalizarTexto(lmsAntigo)
+                item.lms.toLowerCase() ===
+                lmsAntigo.toLowerCase()
             ) {
 
                 return {
@@ -2232,7 +1540,6 @@ async function salvarEdicaoColaborador() {
 
             }
 
-
             return item;
 
         });
@@ -2240,9 +1547,9 @@ async function salvarEdicaoColaborador() {
 
     fecharModalColaborador();
 
-    await carregarColaboradores();
+    carregarColaboradores();
 
-    await carregarHistorico();
+    carregarHistorico();
 
     atualizarDashboard();
 
@@ -2255,18 +1562,11 @@ async function salvarEdicaoColaborador() {
 
 function fecharModalColaborador() {
 
-    const modal = document
+    document
         .getElementById(
             "modalColaborador"
-        );
-
-
-    if (modal) {
-
-        modal.classList
-            .remove("aberto");
-
-    }
+        )
+        .classList.remove("aberto");
 
 }
 
@@ -2279,30 +1579,24 @@ async function excluirColaborador(id) {
 
     const colaborador =
         colaboradores.find(
-            item =>
-                Number(item.id) === Number(id)
+            item => Number(item.id) === Number(id)
         );
 
 
-    if (!colaborador) {
-        return;
-    }
+    if (!colaborador) return;
 
 
-    const confirmar =
-        confirm(
-            `Deseja excluir o colaborador ${colaborador.nome}?`
-        );
+    const confirmar = confirm(
+
+        `Deseja excluir o colaborador ${colaborador.nome}?`
+
+    );
 
 
-    if (!confirmar) {
-        return;
-    }
+    if (!confirmar) return;
 
 
-    const {
-        error
-    } = await db
+    const { error } = await db
         .from("colaboradores")
         .delete()
         .eq("id", id);
@@ -2315,25 +1609,95 @@ async function excluirColaborador(id) {
             error
         );
 
-
         alert(
             "Erro ao excluir o colaborador."
         );
 
-
         return;
-
     }
 
 
     colaboradores =
         colaboradores.filter(
-            item =>
-                Number(item.id) !== Number(id)
+            item => Number(item.id) !== Number(id)
         );
 
 
-    await carregarColaboradores();
+    carregarColaboradores();
+
+}
+
+
+/* =========================================================
+   FORMATAÇÃO
+========================================================= */
+
+function formatarStatus(status) {
+
+    const nomes = {
+
+        retirado: "Retirado",
+
+        devolvido: "Devolvido",
+
+        extraviado: "Extraviado"
+
+    };
+
+
+    return nomes[status] || status;
+
+}
+
+
+function formatarData(data) {
+
+    if (!data) return "-";
+
+
+    return new Date(data)
+        .toLocaleString(
+            "pt-BR",
+            {
+
+                day: "2-digit",
+
+                month: "2-digit",
+
+                year: "numeric",
+
+                hour: "2-digit",
+
+                minute: "2-digit"
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   SEGURANÇA BÁSICA
+========================================================= */
+
+function escaparHTML(texto) {
+
+    if (
+        texto === undefined ||
+        texto === null
+    ) {
+
+        return "";
+
+    }
+
+
+    return String(texto)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
 }
 
@@ -2345,8 +1709,6 @@ async function excluirColaborador(id) {
 document.addEventListener(
     "DOMContentLoaded",
     async () => {
-
-        obterPaginacaoHistorico();
 
         await carregarDados();
 
