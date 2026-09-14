@@ -18,6 +18,10 @@ const db = window.supabase.createClient(
 let registros = [];
 let colaboradores = [];
 
+// Paginação do histórico
+let paginaHistorico = 1;
+const REGISTROS_POR_PAGINA = 40;
+let listaHistorico = [];
 
 /* =========================================================
    CARREGAR DADOS DO BANCO
