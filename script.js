@@ -984,6 +984,31 @@ async function carregarHistorico() {
     renderizarHistorico();
 
 }
+function mudarPaginaHistorico(direcao) {
+
+    const totalPaginas = Math.ceil(
+        listaHistorico.length / REGISTROS_POR_PAGINA
+    );
+
+
+    const novaPagina =
+        paginaHistorico + direcao;
+
+
+    if (
+        novaPagina < 1 ||
+        novaPagina > totalPaginas
+    ) {
+        return;
+    }
+
+
+    paginaHistorico = novaPagina;
+
+
+    renderizarHistorico();
+
+}
 
 
     registros = data || [];
@@ -1017,10 +1042,192 @@ async function carregarHistorico() {
     }
 
 
+   function renderizarHistorico() {
+
     const tabela = document
-        .getElementById(
-            "tabelaHistorico"
-        );
+        .getElementById("tabelaHistorico");
+
+
+    const paginacao = document
+        .getElementById("paginacaoHistorico");
+
+
+    if (!tabela || !paginacao) return;
+
+
+    if (!listaHistorico.length) {
+
+        tabela.innerHTML = `
+
+            <tr>
+
+                <td colspan="8">
+                    Nenhum registro encontrado.
+                </td>
+
+            </tr>
+
+        `;
+
+
+        paginacao.innerHTML = "";
+
+        return;
+    }
+
+
+    const totalPaginas = Math.ceil(
+        listaHistorico.length / REGISTROS_POR_PAGINA
+    );
+
+
+    if (paginaHistorico > totalPaginas) {
+
+        paginaHistorico = totalPaginas;
+
+    }
+
+
+    const inicio = (
+        paginaHistorico - 1
+    ) * REGISTROS_POR_PAGINA;
+
+
+    const fim = inicio + REGISTROS_POR_PAGINA;
+
+
+    const registrosDaPagina =
+        listaHistorico.slice(inicio, fim);
+
+
+    tabela.innerHTML =
+        registrosDaPagina
+            .map(item => `
+
+                <tr>
+
+                    <td>
+                        ${escaparHTML(item.lms)}
+                    </td>
+
+
+                    <td>
+                        ${escaparHTML(item.nome)}
+                    </td>
+
+
+                    <td>
+                        ${escaparHTML(item.codigo)}
+                    </td>
+
+
+                    <td>
+                        ${formatarData(item.retirada)}
+                    </td>
+
+
+                    <td>
+                        ${
+                            item.devolucao
+                            ? formatarData(item.devolucao)
+                            : "-"
+                        }
+                    </td>
+
+
+                    <td>
+
+                        <span
+                            class="status ${item.status}"
+                        >
+                            ${formatarStatus(item.status)}
+                        </span>
+
+                    </td>
+
+
+                    <td class="observacao-tabela">
+
+                        ${
+                            item.observacao
+                            ? escaparHTML(item.observacao)
+                            : "-"
+                        }
+
+                    </td>
+
+
+                    <td>
+
+                        <button
+                            class="btn-editar"
+                            onclick="abrirEdicao(${item.id})"
+                        >
+                            Editar
+                        </button>
+
+
+                        <button
+                            class="btn-excluir"
+                            onclick="excluirRegistro(${item.id})"
+                        >
+                            Excluir
+                        </button>
+
+                    </td>
+
+                </tr>
+
+            `)
+            .join("");
+
+
+    paginacao.innerHTML = `
+
+        <div class="paginacao-info">
+
+            Exibindo
+            ${inicio + 1}
+            até
+            ${Math.min(fim, listaHistorico.length)}
+            de
+            ${listaHistorico.length}
+            registros
+
+        </div>
+
+
+        <div class="paginacao-controles">
+
+            <button
+                class="btn-paginacao"
+                onclick="mudarPaginaHistorico(-1)"
+                ${paginaHistorico === 1 ? "disabled" : ""}
+            >
+                Anterior
+            </button>
+
+
+            <span class="pagina-atual">
+
+                Página ${paginaHistorico} de ${totalPaginas}
+
+            </span>
+
+
+            <button
+                class="btn-paginacao"
+                onclick="mudarPaginaHistorico(1)"
+                ${paginaHistorico === totalPaginas ? "disabled" : ""}
+            >
+                Próxima
+            </button>
+
+        </div>
+
+    `;
+
+}
 
 
     if (!lista.length) {
