@@ -967,6 +967,56 @@ async function carregarHistorico() {
     }
 
 
+    /*
+       Mantém os registros mais recentes primeiro
+       e volta para a primeira página após
+       uma nova busca ou atualização.
+    */
+
+    listaHistorico = lista
+        .slice()
+        .reverse();
+
+
+    paginaHistorico = 1;
+
+
+    renderizarHistorico();
+
+}
+
+
+    registros = data || [];
+
+
+    let lista = registros;
+
+
+    if (termo) {
+
+        lista = registros.filter(
+            item =>
+
+                item.lms
+                    .toLowerCase()
+                    .includes(termo)
+
+                ||
+
+                item.nome
+                    .toLowerCase()
+                    .includes(termo)
+
+                ||
+
+                item.codigo
+                    .toLowerCase()
+                    .includes(termo)
+        );
+
+    }
+
+
     const tabela = document
         .getElementById(
             "tabelaHistorico"
